@@ -3,17 +3,11 @@ skinparam componentStyle uml2
 component Frontend
 component Fast_API
 component Kafka
-component ZooKeeper
 database ClickHouse
 component ETL
-component Analytics
-component DataForAnalytics
 
-Frontend -> Fast_API: Метки данных о\n просмотрах фильмов\n (User_id, Film_id, Timestamp)
+Frontend -> Fast_API: Метки данных о\n просмотрах фильмов\n (User_id\n из токена, Film_id, Timestamp)
 Fast_API -> Kafka: Стриминг\n событий
-Kafka <-up->ZooKeeper
 Kafka -> ETL
 ETL -> ClickHouse
-ClickHouse <-down->DataForAnalytics
-DataForAnalytics <-down-> Analytics
 @enduml
