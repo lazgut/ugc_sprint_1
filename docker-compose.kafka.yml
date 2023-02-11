@@ -1,0 +1,63 @@
+version: "2"
+
+services:
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.8
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/bitnami
+    environment:  # use docker-compose up --env-file .env.debug to debug.
+      - ALLOW_ANONYMOUS_LOGIN=no
+      - ZOO_SERVER_USERS=${ZOO_CLIENT_USER}
+      - ZOO_SERVER_PASSWORDS=${ZOO_CLIENT_PASSWORD}
+      - ZOO_CLIENT_USER=${ZOO_CLIENT_USER}
+      - ZOO_CLIENT_PASSWORD=${ZOO_CLIENT_PASSWORD}
+      - ZOO_ENABLE_AUTH=yes
+  kafka-0:
+    image: docker.io/bitnami/kafka:3.3
+    ports:
+      - "9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=0
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - kafka_0_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+  kafka-1:
+    image: docker.io/bitnami/kafka:3.3
+    ports:
+      - "9092"
+    volumes:
+      - kafka_1_data:/bitnami/kafka
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=1
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+  kafka-2:
+    image: docker.io/bitnami/kafka:3.3
+    ports:
+      - "9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_BROKER_ID=2
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - kafka_2_data:/bitnami/kafka
+    depends_on:
+      - zookeeper
+
+volumes:
+  zookeeper_data:
+    driver: local
+  kafka_0_data:
+    driver: local
+  kafka_1_data:
+    driver: local
+  kafka_2_data:
+    driver: local
+
