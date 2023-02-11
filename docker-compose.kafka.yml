@@ -1,19 +1,6 @@
 version: "2"
 
 services:
-  zookeeper:
-    image: docker.io/bitnami/zookeeper:3.8
-    ports:
-      - "2181:2181"
-    volumes:
-      - zookeeper_data:/bitnami
-    environment:  # use docker-compose up --env-file .env.debug to debug.
-      - ALLOW_ANONYMOUS_LOGIN=no
-      - ZOO_SERVER_USERS=${ZOO_CLIENT_USER}
-      - ZOO_SERVER_PASSWORDS=${ZOO_CLIENT_PASSWORD}
-      - ZOO_CLIENT_USER=${ZOO_CLIENT_USER}
-      - ZOO_CLIENT_PASSWORD=${ZOO_CLIENT_PASSWORD}
-      - ZOO_ENABLE_AUTH=yes
   kafka-0:
     image: docker.io/bitnami/kafka:3.3
     ports:
