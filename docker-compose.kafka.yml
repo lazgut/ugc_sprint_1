@@ -9,6 +9,8 @@ services:
       - zookeeper_data:/bitnami
     environment:  # use docker-compose up --env-file .env.debug to debug.
       - ALLOW_ANONYMOUS_LOGIN=no
+      - ZOO_SERVER_USERS=${ZOO_CLIENT_USER}
+      - ZOO_SERVER_PASSWORDS=${ZOO_CLIENT_PASSWORD}
       - ZOO_CLIENT_USER=${ZOO_CLIENT_USER}
       - ZOO_CLIENT_PASSWORD=${ZOO_CLIENT_PASSWORD}
       - ZOO_ENABLE_AUTH=yes
