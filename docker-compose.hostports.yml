@@ -1,0 +1,15 @@
+version: '3.5'
+
+services:
+    zookeeper:
+      ports:
+        - "2181:2181"
+    kafka-0:
+      ports:
+        - "9092:9092"
+    kafka-1:
+      ports:
+        - "9093:9092"
+    kafka-2:
+      ports:
+        - "9094:9092"
