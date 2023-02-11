@@ -2,6 +2,17 @@ version: '3.5'
 
 services:
   zookeeper:
-    image: zookeeper:3.8
+    image: docker.io/bitnami/zookeeper:3.8
     container_name: zookeeper
     hostname: zookeeper
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/bitnami
+    environment:  # use docker-compose up --env-file .env.debug to debug.
+      - ALLOW_ANONYMOUS_LOGIN=no
+      - ZOO_SERVER_USERS=${ZOO_CLIENT_USER}
+      - ZOO_SERVER_PASSWORDS=${ZOO_CLIENT_PASSWORD}
+      - ZOO_CLIENT_USER=${ZOO_CLIENT_USER}
+      - ZOO_CLIENT_PASSWORD=${ZOO_CLIENT_PASSWORD}
+      - ZOO_ENABLE_AUTH=yes
