@@ -1,7 +1,7 @@
 version: '3.5'
 
 services:
-  zookeeper:
+  zookeeperch:
     image: zookeeper:3.5
     container_name: zookeeperch
     hostname: zookeeperch
