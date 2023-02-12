@@ -20,7 +20,10 @@ logger.setLevel(logging.INFO)
 
 fake=Faker()
 
-p=Producer({'bootstrap.servers':'localhost:9092'})
+p1=Producer({'bootstrap.servers':'localhost:9092'})
+p2=Producer({'bootstrap.servers':'localhost:9093'})
+p3=Producer({'bootstrap.servers':'localhost:9094'})
+producers = [p1, p2, p3]
 print('Kafka Producer has been initiated...')
 
 
@@ -42,6 +45,8 @@ def main():
            'platform': random.choice(['Mobile', 'Laptop', 'Tablet']),
            'signup_at': str(fake.date_time_this_month())
            }
+        producer_number = i % len(producers)
+        p = producers[producer_number]
         m=json.dumps(data)
         p.poll(1)
         p.produce('user-tracker', m.encode('utf-8'),callback=receipt)
