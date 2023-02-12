@@ -7,11 +7,12 @@ services:
       - '2181:2181'
     environment:  # use docker-compose up --env-file .env.debug to debug.
       - ALLOW_ANONYMOUS_LOGIN=yes
+    restart: always
     networks:
       - development_network
 
   clickhouse-node1:
-    image: yandex/clickhouse-server:20.4
+    image: yandex/clickhouse-server:20.3
     container_name: clickhouse-node1
     hostname: clickhouse-node1
     ports:
@@ -25,7 +26,7 @@ services:
       - development_network
 
   clickhouse-node2:
-    image: yandex/clickhouse-server:20.4
+    image: yandex/clickhouse-server:20.3
     container_name: clickhouse-node2
     hostname: clickhouse-node2
     volumes:
@@ -36,7 +37,7 @@ services:
       - development_network
 
   clickhouse-node3:
-    image: yandex/clickhouse-server:20.4
+    image: yandex/clickhouse-server:20.3
     container_name: clickhouse-node3
     hostname: clickhouse-node3
     volumes:
@@ -47,7 +48,7 @@ services:
       - development_network
 
   clickhouse-node4:
-    image: yandex/clickhouse-server:20.4
+    image: yandex/clickhouse-server:20.3
     container_name: clickhouse-node4
     hostname: clickhouse-node4
     volumes:

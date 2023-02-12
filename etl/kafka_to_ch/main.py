@@ -1,10 +1,8 @@
 import asyncio
-import random
 
 from clickhouse_driver import connect
-from kafka import KafkaProducer
 
-from kafka_to_ch.helpers.backoff import backoff
+from helpers.backoff import backoff
 from tools.extractor import KafkaExtractor
 from tools.loader import ClickHouseLoader
 from settings import Settings
@@ -14,30 +12,16 @@ from settings import Settings
 async def main():
     settings = Settings()
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
-
-    for i in range(20):
-        value = bytes(str(random.randrange(160000, 199999)), encoding='utf-8')
-
-        # INPUT DATA
-        producer.send(
-            topic='views',
-            value=value,
-            key=b'953339a0-bc6c-4bbd-88d2-4ee7afae6ec9+10ebcaa3-279a-4b3d-9411-351ccf1746ab',
-        )
-
-    producer.close()
-
     kafka_point = KafkaExtractor('views',
-                                 auto_offset_reset='earliest',
-                                 bootstrap_servers='localhost:9092',
-                                 enable_auto_commit=False,
-                                 group_id='echo-messages-to-stdout',
-                                 chunk_size=10000,
-                                 consumer_timeout_ms=1000)
+                                 auto_offset_reset=settings.offset_reset_ch,
+                                 bootstrap_servers=settings.kafka_dsn,
+                                 enable_auto_commit=settings.auto_commit_ch,
+                                 group_id=settings.group_id_ch,
+                                 chunk_size=settings.chunk_size_ch,
+                                 consumer_timeout_ms=settings.consumer_timeout_ms_ch)
 
     with kafka_point as consumer, \
-            connect('clickhouse://localhost') as conn_ch, conn_ch.cursor() as cursor:
+            connect(settings.clickhouse_dsn) as conn_ch, conn_ch.cursor() as cursor:
         kafka_generator = kafka_point.extract_data()
 
         clickhouse_load = ClickHouseLoader(connect_ch=conn_ch, cursor=cursor, kafka_point=consumer)
@@ -49,4 +33,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    while True:
+        asyncio.run(main())
