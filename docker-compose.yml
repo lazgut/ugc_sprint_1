@@ -6,7 +6,7 @@ services:
     container_name: zookeeper
     hostname: zookeeper
     expose:
-      - "2181:2181"
+      - "2181"
     volumes:
       - zookeeper_data:/bitnami
     environment:  # use docker-compose up --env-file .env.debug to debug.
@@ -22,8 +22,8 @@ services:
     container_name: clickhouse-node1
     hostname: clickhouse-node1
     expose:
-      - "8123:8123"
-      - "9000:9000"
+      - "8123"
+      - "9000"
     volumes:
       - ./clickhousedata/node1:/etc/clickhouse-server
     depends_on:
