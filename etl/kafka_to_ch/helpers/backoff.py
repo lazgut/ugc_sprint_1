@@ -1,17 +1,12 @@
-import time
 import logging
-
+import time
 from functools import wraps
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def backoff(
-        start_sleep_time: float | int = 0.1,
-        factor: int = 2,
-        border_sleep_time: float | int = 10
-):
+def backoff(start_sleep_time: float | int = 0.1, factor: int = 2, border_sleep_time: float | int = 10):
     """
     Функция для повторного выполнения функции через некоторое время, если возникла ошибка.
     Использует наивный экспоненциальный рост времени
@@ -32,17 +27,18 @@ def backoff(
             try:
                 return func(*args, **kwargs)
             except Exception as error:
-                logger.error(f'Failed {func.__name__} with {str(error)}')
+                logger.error(f"Failed {func.__name__} with {str(error)}")
                 n = waiting = 0
                 while True:
                     try:
                         return func(*args, **kwargs)
                     except Exception as error:
-                        logger.error(f'Failed {func.__name__} with {str(error)}')
+                        logger.error(f"Failed {func.__name__} with {str(error)}")
                         if waiting < border_sleep_time:
                             n += 1
-                            waiting = start_sleep_time * factor ** n
+                            waiting = start_sleep_time * factor**n
                         time.sleep(waiting)
+
         return inner
 
     return func_wrapper

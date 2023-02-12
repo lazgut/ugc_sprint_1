@@ -2,12 +2,16 @@ from kafka import KafkaConsumer
 
 
 class KafkaExtractor:
-    def __init__(self, topic: str,
-                 auto_offset_reset: str,
-                 bootstrap_servers: str, enable_auto_commit: bool,
-                 group_id: str,
-                 chunk_size=10000,
-                 consumer_timeout_ms=1000):
+    def __init__(
+        self,
+        topic: str,
+        auto_offset_reset: str,
+        bootstrap_servers: str,
+        enable_auto_commit: bool,
+        group_id: str,
+        chunk_size=10000,
+        consumer_timeout_ms=1000,
+    ):
         self.consumer = None
         self.topic = topic
         self.auto_offset_reset = auto_offset_reset
@@ -19,12 +23,14 @@ class KafkaExtractor:
         self.data_extract = []
 
     def __enter__(self):
-        self.consumer = KafkaConsumer(self.topic,
-                                      auto_offset_reset=self.auto_offset_reset,
-                                      bootstrap_servers=[self.bootstrap_servers],
-                                      enable_auto_commit=self.enable_auto_commit,
-                                      group_id=self.group_id,
-                                      consumer_timeout_ms=self.consumer_timeout_ms)
+        self.consumer = KafkaConsumer(
+            self.topic,
+            auto_offset_reset=self.auto_offset_reset,
+            bootstrap_servers=[self.bootstrap_servers],
+            enable_auto_commit=self.enable_auto_commit,
+            group_id=self.group_id,
+            consumer_timeout_ms=self.consumer_timeout_ms,
+        )
         return self.consumer
 
     def __exit__(self, exc_type, exc_value, traceback):

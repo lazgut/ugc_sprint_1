@@ -8,8 +8,13 @@ from etl.kafka_to_ch.queries import QUERY_INSERT_INTO_CINEMA_CH
 
 
 class ClickHouseLoader:
-    def __init__(self, connect_ch: Connection, cursor: Cursor, kafka_point: KafkaConsumer,
-                 query: str = QUERY_INSERT_INTO_CINEMA_CH):
+    def __init__(
+        self,
+        connect_ch: Connection,
+        cursor: Cursor,
+        kafka_point: KafkaConsumer,
+        query: str = QUERY_INSERT_INTO_CINEMA_CH,
+    ):
         self.connect_ch = connect_ch
         self.cursor = cursor
         self.kafka_point = kafka_point
