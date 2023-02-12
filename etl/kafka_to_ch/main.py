@@ -1,21 +1,22 @@
-import os
-import json
 import asyncio
 import random
-from time import sleep
 
-from clickhouse_driver import Client, connect
-from kafka import KafkaProducer, KafkaConsumer
+from clickhouse_driver import connect
+from kafka import KafkaProducer
 
-from etl.kafka_to_ch.settings import Settings
+from kafka_to_ch.helpers.backoff import backoff
+from tools.extractor import KafkaExtractor
+from tools.loader import ClickHouseLoader
+from settings import Settings
 
 
+@backoff()
 async def main():
     settings = Settings()
 
     producer = KafkaProducer(bootstrap_servers=['localhost:9092'])
 
-    for i in range(100):
+    for i in range(20):
         value = bytes(str(random.randrange(160000, 199999)), encoding='utf-8')
 
         # INPUT DATA
@@ -27,49 +28,24 @@ async def main():
 
     producer.close()
 
-    consumer = KafkaConsumer('views',
-                             auto_offset_reset='earliest',
-                             group_id='echo-messages-to-stdout',
-                             bootstrap_servers=['localhost:9092'],
-                             enable_auto_commit=False,
-                             consumer_timeout_ms=1000,
-                             value_deserializer=lambda m: json.loads(m.decode('ascii')))
-    count = 0
-    data = []
+    kafka_point = KafkaExtractor('views',
+                                 auto_offset_reset='earliest',
+                                 bootstrap_servers='localhost:9092',
+                                 enable_auto_commit=False,
+                                 group_id='echo-messages-to-stdout',
+                                 chunk_size=10000,
+                                 consumer_timeout_ms=1000)
 
-    for message in consumer:
-        if count >= 10:
-            break
-        cash_data = []
-        count += 1
-        cash_data.append(message.key)
-        cash_data.append(message.value)
-        cash_data.append(message.topic)
-        data.append(cash_data)
+    with kafka_point as consumer, \
+            connect('clickhouse://localhost') as conn_ch, conn_ch.cursor() as cursor:
+        kafka_generator = kafka_point.extract_data()
 
+        clickhouse_load = ClickHouseLoader(connect_ch=conn_ch, cursor=cursor, kafka_point=consumer)
+        clickhouse_load.generate_data(kafka_generator)
 
-
-    pass
-    #
-    # client = Client(host='localhost')
-    conn = connect('clickhouse://localhost')
-    cursor = conn.cursor()
-
-    cursor.execute('CREATE DATABASE IF NOT EXISTS test ON CLUSTER company_cluster')
-    create = cursor.execute(
-        'CREATE TABLE IF NOT EXISTS test.regular_table ON CLUSTER company_cluster (id String, event_time Int32, topic String) Engine=MergeTree() ORDER BY id')
-
-    cursor.executemany('INSERT INTO test.regular_table (id, event_time, topic) VALUES', data)
-    s = cursor.execute('SELECT * FROM test.regular_table')
-    s = cursor.fetchall()
-
-    # cursor.execute('DROP TABLE test.regular_table')
-
-
-    # delete = client.execute('DROP TABLE test.regular_table')
-
-    consumer.commit()
-    pass
+        last_data = kafka_point.data_extract
+        if last_data:
+            clickhouse_load.insert_data(last_data)
 
 
 if __name__ == '__main__':
