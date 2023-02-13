@@ -1,23 +1,14 @@
-import logging
-import uuid
 from logging import getLogger
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 from kafka import KafkaProducer
 
+from models import View
 from config import settings
 
 logger = getLogger()
 
 app = FastAPI()
-
-
-class View(BaseModel):
-    user_uuid: uuid.UUID
-    movie_uuid: uuid.UUID
-    topic: str
-    value: int
 
 
 @app.get("/")
