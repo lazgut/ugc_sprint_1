@@ -4,15 +4,9 @@ services:
     zookeeper:
       ports:
         - "2181:2181"
-    kafka-0:
+    kafka:
       ports:
         - "9092:9092"
-    kafka-1:
-      ports:
-        - "9093:9092"
-    kafka-2:
-      ports:
-        - "9094:9092"
 
     clickhouse-node1:
       ports:

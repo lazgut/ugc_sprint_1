@@ -3,8 +3,8 @@ version: '3.5'
 services:
   zookeeper:
     image: 'bitnami/zookeeper:3.6.1'
-    ports:
-      - '2181:2181'
+    expose:
+      - '2181'
     environment:  # use docker-compose up --env-file .env.debug to debug.
       - ALLOW_ANONYMOUS_LOGIN=yes
     restart: always
@@ -15,11 +15,12 @@ services:
     image: yandex/clickhouse-server:20.3
     container_name: clickhouse-node1
     hostname: clickhouse-node1
-    ports:
-      - "8123:8123"
-      - "9000:9000"
+    expose:
+      - "8123"
+      - "9000"
     volumes:
       - ./clickhousedata/node1:/etc/clickhouse-server
+      - ./clickhousedata/node1/init.sql:/docker-entrypoint-initdb.d/init.sql
     depends_on:
       - zookeeper
     networks:
@@ -42,6 +43,7 @@ services:
     hostname: clickhouse-node3
     volumes:
       - ./clickhousedata/node3:/etc/clickhouse-server
+      - ./clickhousedata/node3/init.sql:/docker-entrypoint-initdb.d/init.sql
     depends_on:
       - zookeeper
     networks:
@@ -70,7 +72,6 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
 #     - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 for local debug
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
-
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
       - zookeeper
@@ -91,6 +92,17 @@ services:
       - ./.env:/opt/app/.env
     networks:
       - development_network
+
+  backend:
+    build:
+      context:
+        ./backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/src:/app  # temporary, to debug
 
 networks:
   development_network:
