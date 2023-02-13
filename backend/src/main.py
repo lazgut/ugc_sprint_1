@@ -1,6 +1,4 @@
 import logging
-from typing import Union
-import random
 import uuid
 from logging import getLogger
 
@@ -8,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from kafka import KafkaProducer
 
-from backend.config import settings
+from backend.src.config import settings
 
 logger = getLogger()
 logger.setLevel(logging.INFO)
