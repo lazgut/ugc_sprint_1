@@ -4,7 +4,7 @@ from clickhouse_driver.connection import Connection
 from clickhouse_driver.dbapi.cursor import Cursor
 from kafka import KafkaConsumer
 
-from etl.kafka_to_ch.queries import QUERY_INSERT_INTO_CINEMA_CH
+from helpers.queries import QUERY_INSERT_INTO_CINEMA_CH
 
 
 class ClickHouseLoader:

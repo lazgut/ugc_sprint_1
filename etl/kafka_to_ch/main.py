@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from clickhouse_driver import connect
 from helpers.backoff import backoff
@@ -9,6 +10,7 @@ from tools.loader import ClickHouseLoader
 
 @backoff()
 async def main():
+    logging.info("Created settings.")
     settings = Settings()
 
     kafka_point = KafkaExtractor(
@@ -21,11 +23,15 @@ async def main():
         consumer_timeout_ms=settings.consumer_timeout_ms_ch,
     )
 
+    logging.info("Created kafka_point.")
+
     with kafka_point as consumer, connect(settings.clickhouse_dsn) as conn_ch, conn_ch.cursor() as cursor:
+        logging.info("Extract data from Kafka")
         kafka_generator = kafka_point.extract_data()
 
         clickhouse_load = ClickHouseLoader(connect_ch=conn_ch, cursor=cursor, kafka_point=consumer)
         clickhouse_load.generate_data(kafka_generator)
+        logging.info("Data successful load to Clickhouse")
 
         last_data = kafka_point.data_extract
         if last_data:
@@ -34,4 +40,5 @@ async def main():
 
 if __name__ == "__main__":
     while True:
+        logging.info("Start application")
         asyncio.run(main())

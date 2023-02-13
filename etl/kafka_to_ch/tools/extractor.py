@@ -11,6 +11,7 @@ class KafkaExtractor:
         group_id: str,
         chunk_size=10000,
         consumer_timeout_ms=1000,
+        api_version=(0, 11, 5),
     ):
         self.consumer = None
         self.topic = topic
@@ -21,6 +22,7 @@ class KafkaExtractor:
         self.consumer_timeout_ms = consumer_timeout_ms
         self.chunk_size = chunk_size
         self.data_extract = []
+        self.api_version=api_version
 
     def __enter__(self):
         self.consumer = KafkaConsumer(
@@ -30,6 +32,7 @@ class KafkaExtractor:
             enable_auto_commit=self.enable_auto_commit,
             group_id=self.group_id,
             consumer_timeout_ms=self.consumer_timeout_ms,
+            api_version=self.api_version
         )
         return self.consumer
 
