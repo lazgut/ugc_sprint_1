@@ -29,13 +29,15 @@ async def main():
         logging.info("Extract data from Kafka")
         kafka_generator = kafka_point.extract_data()
 
-        clickhouse_load = ClickHouseLoader(connect_ch=conn_ch, cursor=cursor, kafka_point=consumer)
+        clickhouse_load = ClickHouseLoader(connect_ch=conn_ch, cursor=cursor)
         clickhouse_load.generate_data(kafka_generator)
+        consumer.commit()
         logging.info("Data successful load to Clickhouse")
 
         last_data = kafka_point.data_extract
         if last_data:
             clickhouse_load.insert_data(last_data)
+            consumer.commit()
 
 
 if __name__ == "__main__":
