@@ -42,14 +42,13 @@ def read_item(view: View):
     print(f'kafka address: ', settings.kafka_host_port)
     producer = KafkaProducer(bootstrap_servers=[settings.kafka_host_port])
     try:
-        for i in range(20):
-            # INPUT DATA
-            print("will insert: ", view)
-            producer.send(
-                topic=view.topic,
-                value=str(view.value).encode(),
-                key=f'{view.user_uuid}+{view.movie_uuid}'.encode(),
-            )
+        # INPUT DATA
+        print("will insert: ", view)
+        producer.send(
+            topic=view.topic,
+            value=str(view.value).encode(),
+            key=f'{view.user_uuid}+{view.movie_uuid}'.encode(),
+        )
     except Exception as e:
         logger.error(e)
         return HTTPException(status_code=500, detail=str(e))
