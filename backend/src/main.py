@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from kafka import KafkaProducer
 
-from backend.src.config import settings
+from config import settings
 
 logger = getLogger()
 logger.setLevel(logging.INFO)

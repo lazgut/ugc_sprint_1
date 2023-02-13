@@ -69,28 +69,38 @@ services:
       - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
 #     - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092 or PLAINTEXT://localhost:9092 for local debug
-      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=false
-
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - ALLOW_PLAINTEXT_LISTENER=yes
     depends_on:
       - zookeeper
     networks:
       - development_network
 
-  etl_kafka_to_ch:
-    container_name: etl_kafka_to_ch
+#  etl_kafka_to_ch:
+#    container_name: etl_kafka_to_ch
+#    build:
+#      context: etl/kafka_to_ch
+#      dockerfile: Dockerfile
+#    depends_on:
+#      - clickhouse-node1
+#      - clickhouse-node2
+#      - clickhouse-node3
+#      - clickhouse-node4
+#    volumes:
+#      - ./.env:/opt/app/.env
+#    networks:
+#      - development_network
+  backend:
     build:
-      context: etl/kafka_to_ch
-      dockerfile: Dockerfile
-    depends_on:
-      - clickhouse-node1
-      - clickhouse-node2
-      - clickhouse-node3
-      - clickhouse-node4
+      context:
+        ./backend
+    environment:
+      - KAFKA_HOST="kafka"
+      - KAFKA_PORT=9092
+    ports:
+      - "8000:8000"
     volumes:
-      - ./.env:/opt/app/.env
-    networks:
-      - development_network
+      - ./backend/src:/app  # temporary, to debug
 
 networks:
   development_network:
