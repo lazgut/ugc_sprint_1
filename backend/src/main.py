@@ -9,7 +9,6 @@ from kafka import KafkaProducer
 from config import settings
 
 logger = getLogger()
-logger.setLevel(logging.INFO)
 
 app = FastAPI()
 
@@ -26,6 +25,12 @@ def read_root():
     return {"Hello": "World"}
 
 
+@app.on_event("startup")
+async def startup_event():
+    print(f'kafka address: ', settings.kafka_host_port)
+    # Logging doesn't work.
+
+
 @app.post("/addview")
 def read_item(view: View):
     """
@@ -38,8 +43,6 @@ def read_item(view: View):
     }
 
     """
-    logger.info('kafka address: %s', settings.kafka_host_port)
-    print(f'kafka address: ', settings.kafka_host_port)
     producer = KafkaProducer(bootstrap_servers=[settings.kafka_host_port])
     try:
         # INPUT DATA

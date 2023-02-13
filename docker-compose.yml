@@ -97,9 +97,8 @@ services:
     build:
       context:
         ./backend
-    environment:
-      - KAFKA_HOST=kafka
-      - KAFKA_PORT=9092
+    env_file:
+      - ./backend/.env
     ports:
       - "8000:8000"
     volumes:
