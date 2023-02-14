@@ -103,6 +103,8 @@ services:
       - "8000:8000"
     volumes:
       - ./backend/src:/app  # temporary, to debug
+    networks:
+      - development_network
 
 networks:
   development_network:
