@@ -5,16 +5,14 @@ from fastapi import FastAPI, HTTPException
 
 
 from models import View
-from config import settings
-# from kafka_producer import producer
-from kafka import KafkaProducer
+from kafka_producer import producer
+
 from config import settings
 
 logger = getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 app = FastAPI()
-producer = KafkaProducer(bootstrap_servers=[settings.kafka_host_port], api_version=(0,11,5))
 
 @app.get("/")
 def read_root():
@@ -29,7 +27,6 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     producer.close()
-    await producer.stop()
 
 
 @app.post("/addview")
