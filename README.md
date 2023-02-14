@@ -6,4 +6,4 @@
 
 Задания на спринт вы найдёте внутри тем.
 
-Link to the project: https://github.com/lazgut/ugc_sprint_1
+Link to the project: https://github.com/dondublon/ugc_sprint_1-1
