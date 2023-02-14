@@ -1,15 +1,18 @@
+import logging
 from logging import getLogger
 
 from fastapi import FastAPI, HTTPException
-from kafka import KafkaProducer
+
 
 from models import View
+from kafka_producer import producer
+
 from config import settings
 
-logger = getLogger()
+logger = getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 app = FastAPI()
-
 
 @app.get("/")
 def read_root():
@@ -20,6 +23,10 @@ def read_root():
 async def startup_event():
     print(f'kafka address: ', settings.kafka_host_port)
     # Logging doesn't work.
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    producer.close()
 
 
 @app.post("/addview")
@@ -34,10 +41,7 @@ def read_item(view: View):
     }
 
     """
-    producer = KafkaProducer(bootstrap_servers=[settings.kafka_host_port])
     try:
-        # INPUT DATA
-        print("will insert: ", view)
         producer.send(
             topic=view.topic,
             value=str(view.value).encode(),
@@ -46,8 +50,6 @@ def read_item(view: View):
     except Exception as e:
         logger.error(e)
         return HTTPException(status_code=500, detail=str(e))
-    finally:
-        producer.close()
 
     return "OK"
 
