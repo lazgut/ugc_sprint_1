@@ -1,13 +1,12 @@
 import logging
 from logging import getLogger
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI
 
-from db.kafka_producer import producer
+from db import kafka_producer
 from core.config import settings
 from api.v1.main import router
 
-from config import settings
 
 logger = getLogger(__name__)
 logger.setLevel(logging.INFO)

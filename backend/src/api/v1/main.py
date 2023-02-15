@@ -2,7 +2,7 @@ import logging
 from fastapi import HTTPException, APIRouter
 from starlette.requests import Request
 
-from db.kafka_producer import producer
+from db.kafka_producer import get_aioproducer
 from models.models import View
 
 logger = logging.getLogger(__name__)
@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.post("/addview")
-def add_view(view: View, request: Request):
+async def add_view(view: View, request: Request):
     """
     An example request JSON:
     {
@@ -30,11 +30,12 @@ def add_view(view: View, request: Request):
     if not user_uuid:
         raise HTTPException(401, detail='Unauthorized')
     try:
-        producer.send(
-            topic=view.topic,
-            value=str(view.value).encode(),
-            key=f'{user_uuid}+{view.movie_uuid}'.encode(),
-        )
+        producer = await get_aioproducer()
+        await producer.send(
+             topic=view.topic,
+             key=str(view.value).encode(),
+             value=f'{user_uuid}+{view.movie_uuid}'.encode()
+             )
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail=str(e))
