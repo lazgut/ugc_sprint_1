@@ -3,8 +3,8 @@ from logging import getLogger
 
 from fastapi import FastAPI
 
-from kafka_producer import producer
-from config import settings
+from db.kafka_producer import producer
+from core.config import settings
 from api.v1.main import router
 
 logger = getLogger(__name__)
