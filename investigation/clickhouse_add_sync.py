@@ -5,7 +5,7 @@ import clickhouse_driver
 
 connection_info = {
     'host': 'localhost',
-    'port': 8123,
+    'port': 9000,
 }
 
 class Uuids:
@@ -30,12 +30,9 @@ def send_one_batch(uuids, cur):
     for i in range(100):
         print(i)
         sql = """INSERT INTO default.cinema_ch (id, event_time, topic) VALUES"""
-        data = [(f'{uuids.random_user}+{uuids.random_movie}', random.randint(0, 1000000)) for _ in range(10000)]
-        sql2 = f"""INSERT INTO default.cinema_ch (id, event_time, topic) VALUES 
-            ("{uuids.random_user}+{uuids.random_movie}", 345345, "views")
-        """
-        print(sql2)
-        cur.execute(sql2)
+        data = [(f'{uuids.random_user}+{uuids.random_movie}', str(random.randint(0, 1000000)), "views") for _ in range(10000)]
+
+        cur.executemany(sql, data)
 
 
 def main(count):
