@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-#@router.post("/addview")
+@router.post("/addview")
 def add_view(view: View, request: Request):
     """
     An example request JSON:
