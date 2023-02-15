@@ -3,7 +3,7 @@ from logging import getLogger
 
 from fastapi import FastAPI, HTTPException, Request
 
-
+import kafka_producer
 from models import View
 from kafka_producer import producer
 
@@ -14,8 +14,9 @@ logger.setLevel(logging.INFO)
 
 app = FastAPI()
 
+
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": "World"}
 
 
@@ -23,14 +24,15 @@ def read_root():
 async def startup_event():
     print(f'kafka address: ', settings.kafka_host_port)
     # Logging doesn't work.
+    kafka_producer.aioproducer = await kafka_producer.init_kafka()
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    producer.close()
+    await kafka_producer.aioproducer.stop()
 
 
 @app.post("/addview")
-def add_view(view: View, request: Request):
+async def add_view(view: View, request: Request):
     """
     An example request JSON:
     {
@@ -49,7 +51,7 @@ def add_view(view: View, request: Request):
     if not user_uuid:
         raise HTTPException(401, detail='Unauthorized')
     try:
-        producer.send(
+        await producer.send(
             topic=view.topic,
             value=str(view.value).encode(),
             key=f'{user_uuid}+{view.movie_uuid}'.encode(),
