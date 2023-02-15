@@ -49,11 +49,8 @@ def ask_records_count():
     sql_cmd = 'SELECT COUNT(*) FROM cinema_ch'
     docker_cmd = f'echo "{sql_cmd}" | clickhouse-client'
     here_cmd = f"-ti clickhouse-node1 bash -c '{docker_cmd}'"
-    print(here_cmd)
-    with open('out', 'w') as outfile:
-        proc = Popen(args=['docker', 'exec', 'clickhouse-node1', 'bash', '-c', docker_cmd], stdout=PIPE)
-        # proc.wait()
-    #stdout = proc.communicate()[0]
+    proc = Popen(args=['docker', 'exec', 'clickhouse-node1', 'bash', '-c', docker_cmd], stdout=PIPE)
+
     result = proc.stdout.read()
     return int(result)
 
