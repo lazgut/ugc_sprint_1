@@ -1,4 +1,5 @@
 import logging
+from http import HTTPStatus
 from fastapi import HTTPException, APIRouter
 from starlette.requests import Request
 import orjson
@@ -39,7 +40,7 @@ def add_view(view: View, request: Request):
         success = True
     except Exception as e:
         logger.error(e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
     return orjson.dumps({"success": success})
 
