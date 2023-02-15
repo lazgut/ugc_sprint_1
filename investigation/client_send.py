@@ -5,7 +5,7 @@ import requests
 
 import aiohttp
 from subprocess import Popen, PIPE
-
+from time import sleep, time
 
 def send_one_random():
     main_url = 'http://127.0.0.1:8000'
@@ -30,19 +30,22 @@ async def send_one_async(session, url):
         return result
 
 
-async def main():
+async def main(count):
 
     async with aiohttp.ClientSession() as session:
 
         tasks = []
-        for number in range(100000):
+        for number in range(count):
             main_url = 'http://127.0.0.1:8000'
             url = f'{main_url}/v1/addview'
             tasks.append(send_one_async(session, url))
 
         gathered = await asyncio.gather(*tasks)
-        for one in gathered:
-            print(one)
+        for idx, one in enumerate(gathered):
+            if idx % 1000 == 0:
+                print(one, end=' ')
+        print()
+        print()
 
 
 def ask_records_count():
@@ -55,6 +58,25 @@ def ask_records_count():
     return int(result)
 
 
+def report_records_count(start_time, first_record_count, limit):
+    prev_record_count = None
+    curr_record_count = first_record_count
+    while curr_record_count - first_record_count < limit:
+        sleep(1)
+        curr_record_count = ask_records_count()
+        if curr_record_count != prev_record_count:
+            print("\ttime", time()-start_time, "\trecords", curr_record_count)
+        prev_record_count = curr_record_count
+
+
+
 if __name__ == '__main__':
-    # asyncio.run(main())
-    print(ask_records_count())
+    for i in range(10, 11):
+        count = i * 10000
+        start_time = time()
+        print(f'*** {count} ***')
+        # print("start", start_time)
+        first = ask_records_count()
+        asyncio.run(main(count))
+
+        report_records_count(start_time, first, count)
