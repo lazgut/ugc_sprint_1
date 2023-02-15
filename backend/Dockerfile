@@ -12,4 +12,4 @@ RUN pip install --upgrade pip \
 
 COPY src/* .
 
-ENTRYPOINT ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["gunicorn", "main:app", "0.0.0.0:8000"]
