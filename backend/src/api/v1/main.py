@@ -33,8 +33,8 @@ async def add_view(view: View, request: Request):
         producer = await get_aioproducer()
         await producer.send(
              topic=view.topic,
-             key=str(view.value).encode(),
-             value=f'{user_uuid}+{view.movie_uuid}'.encode()
+             value=str(view.value).encode(),
+             key=f'{user_uuid}+{view.movie_uuid}'.encode()
              )
     except Exception as e:
         logger.error(e)
