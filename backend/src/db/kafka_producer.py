@@ -12,9 +12,6 @@ logger.setLevel(logging.INFO)
 
 logger.info("kafka server: ", settings.kafka_host_port)
 
-producer = AIOKafkaProducer(bootstrap_servers=[settings.kafka_host_port])
-
-
 
 aioproducer: Optional[AIOKafkaProducer] = None
 
