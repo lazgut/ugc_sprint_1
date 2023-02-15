@@ -24,8 +24,8 @@ async def get_aioproducer() -> AIOKafkaProducer:
 async def init_kafka() -> AIOKafkaProducer:
     aioproducer = AIOKafkaProducer(
             bootstrap_servers=[settings.kafka_host_port],
-            retry_backoff_ms=1000,
-            connections_max_idle_ms=5000
+            retry_backoff_ms=settings.retry_backoff_ms,
+            connections_max_idle_ms=settings.connections_max_idle_ms
         )
     await aioproducer.start()
     return aioproducer
