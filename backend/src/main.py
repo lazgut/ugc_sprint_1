@@ -3,9 +3,10 @@ from logging import getLogger
 
 from fastapi import FastAPI
 
-from db.kafka_producer import producer
+from db import kafka_producer
 from core.config import settings
 from api.v1.main import router
+
 
 logger = getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -14,7 +15,7 @@ app = FastAPI()
 
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": "World"}
 
 
@@ -22,9 +23,10 @@ def read_root():
 async def startup_event():
     print(f'kafka address: ', settings.kafka_host_port)
     # Logging doesn't work.
+    kafka_producer.aioproducer = await kafka_producer.init_kafka()
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    producer.close()
+    await kafka_producer.aioproducer.stop()
 
 app.include_router(router, prefix='/v1')
