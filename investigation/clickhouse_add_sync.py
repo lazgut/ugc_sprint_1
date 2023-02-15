@@ -1,5 +1,5 @@
 import random
-import asyncio
+
 
 import clickhouse_driver
 
@@ -28,7 +28,7 @@ class Uuids:
 
 def send_one_batch(uuids, cur):
     for i in range(100):
-        print(i)
+        print(i, end=' ')
         sql = """INSERT INTO default.cinema_ch (id, event_time, topic) VALUES"""
         data = [(f'{uuids.random_user}+{uuids.random_movie}', str(random.randint(0, 1000000)), "views") for _ in range(10000)]
 
@@ -41,7 +41,8 @@ def main(count):
     connection = clickhouse_driver.connect(**connection_info)
     cur = connection.cursor()
 
-    for number in range(1):
+    for number in range(50):
+        print("\nmillion", number)
         send_one_batch(uuids, cur)
 
         # await asyncio.gather(*tasks)

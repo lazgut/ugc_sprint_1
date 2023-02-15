@@ -84,17 +84,17 @@ def report_records_count(start_time, first_record_count, limit):
         prev_record_count = curr_record_count
 
 
-
 if __name__ == '__main__':
-    for i in range(1, 2):
-        count = i * 10000
+    for i in range(1, 500):
+        # print(i)
+        count = 100000
         start_time = time()
-        print(f'*** {count} ***')
+        print(f'*** {i} ***')
         # print("start", start_time)
         first = ask_records_count()
         asyncio.run(main(count))
 
-        report_records_count(start_time, first, count)
+        # report_records_count(start_time, first, count)
     # u = Uuids()
     # print(u.random_user)
     # print(u.random_movie)
