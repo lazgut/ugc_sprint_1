@@ -1,19 +1,16 @@
 import os
-from pydantic import BaseSettings
+from pydantic import BaseSettings, Field
 
 
 class Settings(BaseSettings):
-    kafka_host: str = os.environ['KAFKA_HOST']
-    kafka_port: int = os.environ['KAFKA_PORT']
+    kafka_host: str = Field('kafka', env='KAFKA_HOST')
+    kafka_port: int = Field(9092, env='KAFKA_PORT')
+
 
     @property
     def kafka_host_port(self):
         return f'{self.kafka_host}:{self.kafka_port}'
 
-    class Config:
-        case_sensitive = False
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-
+    # We get environment variables from the docker-compose, reference to .env.
 
 settings = Settings()
