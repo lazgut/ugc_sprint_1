@@ -2,8 +2,8 @@ import logging
 from fastapi import HTTPException, APIRouter
 from starlette.requests import Request
 
-from kafka_producer import producer
-from api.v1.models import View
+from db.kafka_producer import producer
+from models.models import View
 
 logger = logging.getLogger(__name__)
 

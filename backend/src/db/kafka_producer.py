@@ -1,6 +1,6 @@
 import logging
 from kafka import KafkaProducer
-from config import settings
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
