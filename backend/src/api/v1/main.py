@@ -1,16 +1,17 @@
 import logging
 from fastapi import HTTPException, APIRouter
 from starlette.requests import Request
-
+import orjson
 from db.kafka_producer import producer
 from models.models import View
+
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
-@router.post("/addview")
+#@router.post("/addview")
 def add_view(view: View, request: Request):
     """
     An example request JSON:
@@ -35,9 +36,10 @@ def add_view(view: View, request: Request):
             value=str(view.value).encode(),
             key=f'{user_uuid}+{view.movie_uuid}'.encode(),
         )
+        success = True
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail=str(e))
 
-    return "OK"
+    return orjson.dumps({"success": success})
 

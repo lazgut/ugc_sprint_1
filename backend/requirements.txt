@@ -1,4 +1,5 @@
 fastapi==0.91.0
 gunicorn==20.1.0
 kafka-python==2.0.2
+orjson==3.8.6
 uvicorn[standard]
