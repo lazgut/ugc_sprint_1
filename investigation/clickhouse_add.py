@@ -5,7 +5,7 @@ import clickhouse_driver
 
 connection_info = {
     'host': '127.0.0.1',
-    'port': 8123,
+    'port': 9000,
 }
 
 class Uuids:
