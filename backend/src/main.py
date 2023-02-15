@@ -3,9 +3,9 @@ from logging import getLogger
 
 from fastapi import FastAPI, HTTPException, Request
 
-import kafka_producer
-from models import View
-from kafka_producer import producer
+from db.kafka_producer import producer
+from core.config import settings
+from api.v1.main import router
 
 from config import settings
 
@@ -30,35 +30,4 @@ async def startup_event():
 async def shutdown_event():
     await kafka_producer.aioproducer.stop()
 
-
-@app.post("/addview")
-async def add_view(view: View, request: Request):
-    """
-    An example request JSON:
-    {
-
-    "movie_uuid": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
-    "topic": "views",
-    "value": 3921837
-    }
-    We assume that request headers contain used_uuid, after processing with authentication and middleware.
-    Headers:
-        ...
-        user_uuid: d16b19e7-e116-43b1-a95d-cd5a11e8f1b4
-        ...
-    """
-    user_uuid = request.headers.get('user_uuid')
-    if not user_uuid:
-        raise HTTPException(401, detail='Unauthorized')
-    try:
-        await producer.send(
-            topic=view.topic,
-            value=str(view.value).encode(),
-            key=f'{user_uuid}+{view.movie_uuid}'.encode(),
-        )
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(status_code=500, detail=str(e))
-
-    return "OK"
-
+app.include_router(router, prefix='/v1')

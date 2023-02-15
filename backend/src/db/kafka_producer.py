@@ -5,7 +5,7 @@ import backoff
 from aiokafka import AIOKafkaProducer
 from kafka.errors import KafkaConnectionError
 
-from config import settings
+from core.config import settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
