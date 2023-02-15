@@ -7,6 +7,21 @@ import aiohttp
 from subprocess import Popen, PIPE
 from time import sleep, time
 
+class Uuids:
+    def __init__(self):
+        with open('users') as fu:
+            self.users = [s.strip() for s in fu.readlines()]
+        with open('movies') as fm:
+            self.movies = [s.strip() for s in fm.readlines()]
+
+    @property
+    def random_user(self):
+        return self.users[random.randint(0, len(self.users)-1)]
+
+    @property
+    def random_movie(self):
+        return self.movies[random.randint(0, len(self.movies)-1)]
+
 def send_one_random():
     main_url = 'http://127.0.0.1:8000'
     url = f'{main_url}/v1/addview'
@@ -18,27 +33,27 @@ def send_one_random():
     return r
 
 
-async def send_one_async(session, url):
+async def send_one_async(uuids, session, url):
 
-    obj = {"movie_uuid": str(uuid.uuid4()),
+    obj = {"movie_uuid": uuids.random_movie,
            "topic": "views",
            "value": random.randint(1, 10000000)
            }
 
-    async with session.post(url, json=obj, headers={'user_uuid': str(uuid.uuid4())}) as resp:
+    async with session.post(url, json=obj, headers={'user_uuid': uuids.random_user}) as resp:
         result = await resp.text()
         return result
 
 
 async def main(count):
-
+    uuids = Uuids()
     async with aiohttp.ClientSession() as session:
 
         tasks = []
         for number in range(count):
             main_url = 'http://127.0.0.1:8000'
             url = f'{main_url}/v1/addview'
-            tasks.append(send_one_async(session, url))
+            tasks.append(send_one_async(uuids, session, url))
 
         gathered = await asyncio.gather(*tasks)
         for idx, one in enumerate(gathered):
@@ -71,7 +86,7 @@ def report_records_count(start_time, first_record_count, limit):
 
 
 if __name__ == '__main__':
-    for i in range(10, 11):
+    for i in range(1, 2):
         count = i * 10000
         start_time = time()
         print(f'*** {count} ***')
@@ -80,3 +95,6 @@ if __name__ == '__main__':
         asyncio.run(main(count))
 
         report_records_count(start_time, first, count)
+    # u = Uuids()
+    # print(u.random_user)
+    # print(u.random_movie)
