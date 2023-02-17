@@ -1,62 +1,40 @@
-import logging
-from logging import getLogger
+import uvicorn
+import backoff
+from aiokafka import AIOKafkaProducer
+from fastapi import FastAPI
+from kafka.errors import KafkaConnectionError
 
-from fastapi import FastAPI, HTTPException, Request
+from core.config import settings
+from db import kafka
 
-
-from models import View
-from kafka_producer import producer
-
-from config import settings
-
-logger = getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
 
-
-@app.on_event("startup")
-async def startup_event():
-    print(f'kafka address: ', settings.kafka_host_port)
-    # Logging doesn't work.
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    producer.close()
-
-
-@app.post("/addview")
-def add_view(view: View, request: Request):
-    """
-    An example request JSON:
-    {
-
-    "movie_uuid": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
-    "topic": "views",
-    "value": 3921837
-    }
-    We assume that request headers contain used_uuid, after processing with authentication and middleware.
-    Headers:
-        ...
-        user_uuid: d16b19e7-e116-43b1-a95d-cd5a11e8f1b4
-        ...
-    """
-    user_uuid = request.headers.get('user_uuid')
-    if not user_uuid:
-        raise HTTPException(401, detail='Unauthorized')
-    try:
-        producer.send(
-            topic=view.topic,
-            value=str(view.value).encode(),
-            key=f'{user_uuid}+{view.movie_uuid}'.encode(),
+@backoff.on_exception(backoff.expo, KafkaConnectionError)
+async def init_kafka() -> AIOKafkaProducer:
+    aioproducer = AIOKafkaProducer(
+            bootstrap_servers=[f'{settings.KAFKA_HOST}:{settings.KAFKA_PORT}'],
+            retry_backoff_ms=1000,
+            connections_max_idle_ms=5000
         )
-    except Exception as e:
-        logger.error(e)
-        raise HTTPException(status_code=500, detail=str(e))
+    await aioproducer.start()
+    return aioproducer
 
-    return "OK"
 
+@app.on_event('startup')
+async def startup():
+    kafka.aioproducer = await init_kafka()
+
+
+@app.on_event('shutdown')
+async def shutdown():
+    await kafka.aioproducer.stop()
+
+
+if __name__ == '__main__':
+    uvicorn.run(
+        'main:app',
+        host='0.0.0.0',
+        port=8000,
+    )

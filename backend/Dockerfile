@@ -1,15 +1,13 @@
 FROM python:3.10
 
-WORKDIR /app
-
-#ENV PYTHONDONTWRITEBYTECODE 1
-#ENV PYTHONUNBUFFERED 1
+WORKDIR /app/
 
 COPY requirements.txt requirements.txt
 
-RUN pip install --upgrade pip \
+RUN pip install pip -U \
     && pip install --no-cache-dir -r requirements.txt
 
-COPY src/* .
+COPY ./src /app
+ENV PYTHONPATH=/app
 
-ENTRYPOINT ["gunicorn", "main:app", "0.0.0.0:8000"]
+ENTRYPOINT ["gunicorn", "main:app", "bind", "0.0.0.0:8000", "-k", "uvicorn.workers.UvicornWorker"]

@@ -14,18 +14,18 @@ async def main():
     settings = Settings()
 
     kafka_point = KafkaExtractor(
-        settings.topic_ch,
-        auto_offset_reset=settings.offset_reset_ch,
-        bootstrap_servers=settings.kafka_dsn,
-        enable_auto_commit=settings.auto_commit_ch,
-        group_id=settings.group_id_ch,
-        chunk_size=settings.chunk_size_ch,
-        consumer_timeout_ms=settings.consumer_timeout_ms_ch,
+        settings.TOPIC_CH,
+        auto_offset_reset=settings.OFFSET_RESET_CH,
+        bootstrap_servers=settings.KAFKA_DSN,
+        enable_auto_commit=settings.AUTO_COMMIT_CH,
+        group_id=settings.GROUP_ID_CH,
+        chunk_size=settings.CHUNK_SIZE_CH,
+        consumer_timeout_ms=settings.CONSUMER_TIMEOUT_MS_CH,
     )
 
     logging.info("Created kafka_point.")
 
-    with kafka_point as consumer, connect(settings.clickhouse_dsn) as conn_ch, conn_ch.cursor() as cursor:
+    with kafka_point as consumer, connect(settings.CLICKHOUSE_DSN) as conn_ch, conn_ch.cursor() as cursor:
         logging.info("Extract data from Kafka")
         kafka_generator = kafka_point.extract_data()
 

@@ -12,13 +12,14 @@ services:
       - development_network
 
   clickhouse-node1:
-    image: yandex/clickhouse-server:20.3
+    image: yandex/clickhouse-server:20.7
     container_name: clickhouse-node1
     hostname: clickhouse-node1
     expose:
       - "8123"
       - "9000"
     volumes:
+      - ./clickhousedata/node1/data:/var/lib/clickhouse/
       - ./clickhousedata/node1:/etc/clickhouse-server
       - ./clickhousedata/node1/init.sql:/docker-entrypoint-initdb.d/init.sql
     depends_on:
@@ -27,10 +28,11 @@ services:
       - development_network
 
   clickhouse-node2:
-    image: yandex/clickhouse-server:20.3
+    image: yandex/clickhouse-server:20.7
     container_name: clickhouse-node2
     hostname: clickhouse-node2
     volumes:
+      - ./clickhousedata/node2/data:/var/lib/clickhouse/
       - ./clickhousedata/node2:/etc/clickhouse-server
     depends_on:
       - zookeeper
@@ -38,10 +40,11 @@ services:
       - development_network
 
   clickhouse-node3:
-    image: yandex/clickhouse-server:20.3
+    image: yandex/clickhouse-server:20.7
     container_name: clickhouse-node3
     hostname: clickhouse-node3
     volumes:
+      - ./clickhousedata/node3/data:/var/lib/clickhouse/
       - ./clickhousedata/node3:/etc/clickhouse-server
       - ./clickhousedata/node3/init.sql:/docker-entrypoint-initdb.d/init.sql
     depends_on:
@@ -50,10 +53,11 @@ services:
       - development_network
 
   clickhouse-node4:
-    image: yandex/clickhouse-server:20.3
+    image: yandex/clickhouse-server:20.7
     container_name: clickhouse-node4
     hostname: clickhouse-node4
     volumes:
+      - ./clickhousedata/node4/data:/var/lib/clickhouse/
       - ./clickhousedata/node4:/etc/clickhouse-server
     depends_on:
       - zookeeper
@@ -80,6 +84,8 @@ services:
 
   etl_kafka_to_ch:
     container_name: etl_kafka_to_ch
+    env_file:
+      - .env
     build:
       context: etl/kafka_to_ch
       dockerfile: Dockerfile
@@ -88,19 +94,17 @@ services:
       - clickhouse-node2
       - clickhouse-node3
       - clickhouse-node4
-    volumes:
-      - ./.env:/opt/app/.env
     networks:
       - development_network
 
   backend:
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
     build:
       context:
         ./backend
-    env_file:
-      - ./.env
-    ports:
-      - "8000:8000"
     volumes:
       - ./backend/src:/app  # temporary, to debug
     networks:
@@ -109,4 +113,4 @@ services:
 networks:
   development_network:
     name: development_network
-    external: true
+    external: false

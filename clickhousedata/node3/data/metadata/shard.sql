@@ -1,0 +1,2 @@
+ATTACH DATABASE shard
+ENGINE = Ordinary

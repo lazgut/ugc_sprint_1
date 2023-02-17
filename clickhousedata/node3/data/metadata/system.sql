@@ -1,0 +1,2 @@
+ATTACH DATABASE system
+ENGINE = Ordinary
