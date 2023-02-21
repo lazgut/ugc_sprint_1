@@ -22,7 +22,7 @@ class KafkaExtractor:
         self.consumer_timeout_ms = consumer_timeout_ms
         self.chunk_size = chunk_size
         self.data_extract = []
-        self.api_version=api_version
+        self.api_version = api_version
 
     def __enter__(self):
         self.consumer = KafkaConsumer(

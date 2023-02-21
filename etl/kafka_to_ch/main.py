@@ -14,7 +14,7 @@ async def main():
     settings = Settings()
 
     kafka_point = KafkaExtractor(
-        settings.TOPIC_CH,
+        topic=settings.TOPIC_CH,
         auto_offset_reset=settings.OFFSET_RESET_CH,
         bootstrap_servers=settings.KAFKA_DSN,
         enable_auto_commit=settings.AUTO_COMMIT_CH,

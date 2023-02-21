@@ -3,8 +3,13 @@ version: '3.5'
 services:
   zookeeper:
     image: 'bitnami/zookeeper:3.6.1'
-    expose:
-      - '2181'
+    container_name: zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+      - "8080:8080"
+    env_file:
+      - .env
     environment:  # use docker-compose up --env-file .env.debug to debug.
       - ALLOW_ANONYMOUS_LOGIN=yes
     restart: always
@@ -15,9 +20,9 @@ services:
     image: yandex/clickhouse-server:20.7
     container_name: clickhouse-node1
     hostname: clickhouse-node1
-    expose:
-      - "8123"
-      - "9000"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
     volumes:
       - ./clickhousedata/node1/data:/var/lib/clickhouse/
       - ./clickhousedata/node1:/etc/clickhouse-server
@@ -66,14 +71,15 @@ services:
 
   kafka:
     image: 'bitnami/kafka:3.1.2'
-    expose:
-      - "9092"
+    container_name: kafka
+    hostname: kafka
+    ports:
+      - "9092:9092"
     environment:
       - KAFKA_BROKER_ID=1
       - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
-      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
-      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
-      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://127.0.0.1:9092
 #     - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 for local debug
       - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
       - ALLOW_PLAINTEXT_LISTENER=yes
@@ -98,6 +104,7 @@ services:
       - development_network
 
   backend:
+    container_name: backend
     env_file:
       - .env
     ports:
@@ -105,12 +112,14 @@ services:
     build:
       context:
         ./backend
-    volumes:
-      - ./backend/src:/app  # temporary, to debug
+    depends_on:
+      - kafka
+#    volumes:
+#      - ./backend/src:/app  # temporary, to debug
     networks:
       - development_network
 
 networks:
   development_network:
     name: development_network
-    external: false
+    external: true
