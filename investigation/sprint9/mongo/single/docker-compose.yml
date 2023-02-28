@@ -1,0 +1,11 @@
+services:
+  mongo:
+    container_name: mongosingle
+    image: mongo
+    ports:
+      - 27017:27017
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./tmp/mongo_cluster/data1:/data/db
