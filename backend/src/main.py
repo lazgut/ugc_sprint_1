@@ -1,15 +1,8 @@
-import logging
-from logging import getLogger
-
-from fastapi import FastAPI
-
-from db import kafka_producer
-from core.config import settings
+import sentry_sdk
 from api.v1.main import router
-
-
-logger = getLogger(__name__)
-logger.setLevel(logging.INFO)
+from core.config import settings
+from db import kafka_producer
+from fastapi import FastAPI
 
 app = FastAPI()
 
@@ -21,12 +14,18 @@ async def read_root():
 
 @app.on_event("startup")
 async def startup_event():
-    print(f'kafka address: ', settings.kafka_host_port)
-    # Logging doesn't work.
-    kafka_producer.aioproducer = await kafka_producer.init_kafka()
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=settings.logstash_traces_sample_rate,
+    )
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await kafka_producer.aioproducer.stop()
 
-app.include_router(router, prefix='/v1')
+
+app.include_router(router, prefix="/v1")
