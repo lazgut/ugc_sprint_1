@@ -25,5 +25,5 @@ settings = Settings()
 logger = getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(
-    logstash.LogstashHandler(settings.logstash_host, settings.logstash_port, version=1)
+    logstash.LogstashHandler(settings.logstash_host, settings.logstash_port, version=1, tags='backend')
 )
