@@ -19,6 +19,17 @@ services:
     networks:
       - development_network
 
+  mongo:
+    container_name: mongosingle
+    image: mongo
+    expose:
+      - "27017"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ~/tmp/mongo_single/data1:/data/db
+    networks:
+      - development_network
+
   logstash:
     image: logstash:7.10.1
     env_file:
@@ -77,7 +88,6 @@ services:
     networks:
       - development_network
     restart: always
-
 
 networks:
   development_network:

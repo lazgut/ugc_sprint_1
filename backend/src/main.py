@@ -1,7 +1,11 @@
 import sentry_sdk
+from api.v1.bookmarks import router_bookmarks
+from api.v1.likes import router_likes
 from api.v1.main import router
+from api.v1.review_likes import router_reviewlikes
+from api.v1.reviews import router_reviews
 from core.config import settings
-from db import kafka_producer
+from db import mongo
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -22,10 +26,20 @@ async def startup_event():
         traces_sample_rate=settings.logstash_traces_sample_rate,
     )
 
+    # Logging doesn't work.
+    # kafka_producer.aioproducer = await kafka_producer.init_kafka()
+    mongo.mongo_client = await mongo.init_mongo_client()
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    await kafka_producer.aioproducer.stop()
+    # await kafka_producer.aioproducer.stop()
+    pass
 
 
-app.include_router(router, prefix="/v1")
+V1 = "/v1"
+app.include_router(router, prefix=V1)
+app.include_router(router_likes, prefix=V1)
+app.include_router(router_reviews, prefix=V1)
+app.include_router(router_reviewlikes, prefix=V1)
+app.include_router(router_bookmarks, prefix=V1)
