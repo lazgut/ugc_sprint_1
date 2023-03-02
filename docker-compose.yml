@@ -7,8 +7,10 @@ services:
         ./backend
     env_file:
       - ./.env
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
+    depends_on:
+      - mongo
     volumes:
       - ./backend/src:/app  # temporary, to debug
     logging:
@@ -36,8 +38,8 @@ services:
       - ./.env
     environment:
       XPACK_MONITORING_ENABLED: "true"
-    ports:
-      - "5044:5043/udp"
+    expose:
+      - "5043/udp"
     volumes:
       - ./deploy/logstash.conf:/config/logstash.conf:ro
       - ./tmp/logs/nginx/:/var/log/nginx/:ro
@@ -60,8 +62,8 @@ services:
 
   kibana:
     image: kibana:7.10.1
-    ports:
-      - "5601:5601"
+    expose:
+      - "5601"
     depends_on:
       - elasticsearch
     networks:

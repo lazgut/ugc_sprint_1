@@ -1,6 +1,19 @@
 version: '3.5'
 
 services:
+  backend:
+    ports:
+      - "8000:8000"
+  logstash:
+    ports:
+      - "5044:5043/udp"
   mongo:
     ports:
-      - 27017:27017
+      - "27017:27017"
+  elasticsearch:
+    ports:
+      - "9200:9200"
+  kibana:
+    ports:
+      - "5601:5601"
+
