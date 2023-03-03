@@ -18,7 +18,7 @@ async def add_review(review: Review, request: Request):
     """
     An example request JSON:
     {
-    "movie_uuid": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
+    "movie": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
     "text" : "......"
     }
     We assume that request headers contain used_uuid, after processing with authentication and middleware.

@@ -19,7 +19,7 @@ async def add_like(like: ReviewLike, request: Request):
     """
     An example request JSON:
     {
-    "review_uuid": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
+    "review": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
     }
     We assume that request headers contain used_uuid, after processing with authentication and middleware.
     Headers:
