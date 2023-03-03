@@ -1,11 +1,13 @@
 from http import HTTPStatus
 
 import orjson
-from core.config import logger, settings
-from db.mongo import get_mongo_client
+
+from core.config import logger
 from fastapi import APIRouter, HTTPException
 from models.models import ReviewId, ReviewLike
 from starlette.requests import Request
+from services.review_likes import ReviewLikes
+from .common import authorize
 
 from .common import authorize
 
@@ -31,17 +33,7 @@ async def add_like(like: ReviewLike, request: Request):
     if not (0 <= like.value <= 10):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Value must be from 0 to 10.s")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        main_idx = {
-            "user": user_uuid,
-            "review": str(like.review),
-            "movie": str(like.movie),
-        }
-        result = await collection.update_one(
-            main_idx, {"$set": {"value": like.value}}, upsert=True
-        )
+        result = await ReviewLikes.add(user_uuid, like)
 
         success = True
         logger.info("Successfully added %s, user=%s, %s=%s",
@@ -69,12 +61,7 @@ async def remove_like(review: ReviewId, request: Request):
     """
     user_uuid = request.headers.get("user_uuid")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        result = await collection.delete_one(
-            {"user": user_uuid, "review": str(review.id)}
-        )
+        result = await ReviewLikes.remove(user_uuid, review)
         success = True
         logger.info("Successfully deleted %s, user=%s, review=%s",
                      COLLECTION_NAME, user_uuid, review)
@@ -104,14 +91,7 @@ async def count_likes(review: ReviewId, user_uuid, request: Request):
     """
     user_uuid = request.headers.get("user_uuid")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        cursor = collection.find({"review": str(review.id)})
-        values = []
-        async for doc in cursor:
-            values.append(doc["value"])
-        average = sum(values) / len(values)
+        count, average = ReviewLikes.count(review=review)
         success = True
         logger.info("Succesfully counted %s, user=%s, review=%s",
                      COLLECTION_NAME, user_uuid, review)
@@ -120,4 +100,4 @@ async def count_likes(review: ReviewId, user_uuid, request: Request):
                      COLLECTION_NAME, user_uuid, review, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return orjson.dumps({"success": success, "count": len(values), "average": average})
+    return orjson.dumps({"success": success, "count": count, "average": average})

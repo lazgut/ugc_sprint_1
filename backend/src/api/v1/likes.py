@@ -1,12 +1,12 @@
 from http import HTTPStatus
 
 import orjson
-from core.config import logger, settings
-from db.mongo import get_mongo_client
+from core.config import logger
 from fastapi import APIRouter, HTTPException
 from models.models import Like, Movie
 from starlette.requests import Request
 
+from services.likes import Likes
 from .common import authorize
 
 
@@ -32,13 +32,7 @@ async def add_like(like: Like, request: Request):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Value must be from 0 to 10.s")
     user_uuid = request.headers.get("user_uuid")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        main_idx = {"user": user_uuid, "movie": str(like.movie)}
-        result = await collection.update_one(
-            main_idx, {"$set": {"value": like.value}}, upsert=True
-        )
+        result = await Likes.add(user_uuid, like)
 
         success = True
         logger.info("Successfully added %s, user=%s, %s=%s",
@@ -67,12 +61,7 @@ async def remove_like(movie: Movie, request: Request):
     """
     user_uuid = request.headers.get("user_uuid")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        result = await collection.delete_one(
-            {"user": user_uuid, "movie": str(movie.id)}
-        )
+        result = await Likes.remove(user_uuid, movie)
         success = True
         logger.info("Successfully deleted %s, user=%s, movie=%s",
                      COLLECTION_NAME, user_uuid, movie)
@@ -102,14 +91,7 @@ async def count_likes(movie: Movie, request: Request):
     """
     user_uuid = request.headers.get("user_uuid")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        cursor = collection.find({"movie": str(movie.id)})
-        values = []
-        async for doc in cursor:
-            values.append(doc["value"])
-        average = sum(values) / len(values)
+        count, average = await Likes.count(movie)
         success = True
         logger.info("Successfully counted %s, user=%s, movie=%s",
                      COLLECTION_NAME, user_uuid, movie)
@@ -118,4 +100,4 @@ async def count_likes(movie: Movie, request: Request):
                      COLLECTION_NAME, user_uuid, movie, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return orjson.dumps({"success": success, "count": len(values), "average": average})
+    return orjson.dumps({"success": success, "count": count, "average": average})
