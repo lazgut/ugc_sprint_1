@@ -4,9 +4,18 @@ services:
   backend:
     ports:
       - "8000:8000"
+  auth:
+    ports:
+      - "5001:5001"
   logstash:
     ports:
       - "5044:5043/udp"
+  postgres:
+    ports:
+      - "5432:5432"
+  redis:
+    ports:
+      - "6379:6379"
   mongo:
     ports:
       - "27017:27017"

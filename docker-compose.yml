@@ -21,6 +21,46 @@ services:
     networks:
       - development_network
 
+  auth:
+    build:
+      context: auth
+      dockerfile: Dockerfile
+    container_name: auth
+    volumes:
+      - ./.env:/opt/app/.env
+    expose:
+      - "5001"
+    networks:
+      - development_network
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:15.1
+    container_name: postgres
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DB_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - .:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - development_network
+
+  redis:
+    image: redis:7.0.5
+    container_name: redis
+    restart: always
+    expose:
+      - "6379"
+    networks:
+      - development_network
+
   mongo:
     container_name: mongosingle
     image: mongo
