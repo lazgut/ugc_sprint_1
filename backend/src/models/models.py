@@ -1,38 +1,38 @@
 import uuid
+from .common import BaseOrjsonModel
 
-from pydantic import BaseModel
-
-# No need to pass 'user' here, this is for FastApi, user uuid goes
+# No need to pass 'user' here, this is for FastApi, user uuid comes
 # from the request header.
 
 
-class Movie(BaseModel):
+
+class Movie(BaseOrjsonModel):
     id: uuid.UUID
 
 
-class Like(BaseModel):
+class Like(BaseOrjsonModel):
     movie: uuid.UUID
     # user: uuid.UUID
     value: int  # 0-10
 
 
-class Review(BaseModel):
+class Review(BaseOrjsonModel):
     movie: uuid.UUID
     # user: uuid.UUID
     text: str
 
 
-class ReviewId(BaseModel):
+class ReviewId(BaseOrjsonModel):
     id: uuid.UUID
 
 
-class ReviewLike(BaseModel):
+class ReviewLike(BaseOrjsonModel):
     movie: uuid.UUID
     review: str
     # user: uuid.UUID
     value: int  # 0-10
 
 
-class Bookmark(BaseModel):
+class Bookmark(BaseOrjsonModel):
     movie: uuid.UUID
     # user: uuid.UUID
