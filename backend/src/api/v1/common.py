@@ -26,7 +26,7 @@ def authorize(func):
                                })
         json_obj = auth_response.json()
         a_token = json_obj.get("access_token")
-        decoded = jwt.decode(a_token, settings.auth_secret_key, algorithms="HS256")
+        decoded = jwt.decode(a_token, settings.auth_secret_key, algorithms=["HS256"])
         if "access_token" in json_obj:
             return await func(request=request, **kwargs)
         else:
@@ -48,7 +48,7 @@ async def check_auth(request: Request):
     a_token = json_obj.get("access_token")
     if not a_token:
         raise HTTPException(HTTPStatus.UNAUTHORIZED)
-    decoded = jwt.decode(a_token, settings.auth_secret_key, algorithms="HS256")
+    decoded = jwt.decode(a_token, settings.auth_secret_key, algorithms=["HS256"])
     user_uuid = decoded.get("sub")
     if not user_uuid:
         raise HTTPException(HTTPStatus.UNAUTHORIZED)
