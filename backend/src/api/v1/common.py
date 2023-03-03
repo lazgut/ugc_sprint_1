@@ -46,9 +46,12 @@ async def check_auth(request: Request):
                                   })
     json_obj = auth_response.json()
     a_token = json_obj.get("access_token")
+    if not a_token:
+        raise HTTPException(HTTPStatus.UNAUTHORIZED)
     decoded = jwt.decode(a_token, settings.auth_secret_key, algorithms="HS256")
     user_uuid = decoded.get("sub")
-    # TODO Где-то тут должна быть проверка токена.
+    if not user_uuid:
+        raise HTTPException(HTTPStatus.UNAUTHORIZED)
     return user_uuid
 
 
