@@ -1,18 +1,21 @@
-import datetime
 from http import HTTPStatus
 
 import orjson
-from core.config import logger, settings
-from db.mongo import get_mongo_client
+from core.config import logger
 from fastapi import APIRouter, HTTPException
 from models.models import Bookmark, Movie
 from starlette.requests import Request
+
+from services.bookmarks import Bookmarks
+from .common import authorize
+
 
 COLLECTION_NAME = "bookmarks"
 router_bookmarks = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_bookmarks.post("/add")
+@authorize
 async def add_bookmark(bookmark: Bookmark, request: Request):
     """
     An example request JSON:
@@ -26,19 +29,8 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        result = await collection.insert_one(
-            {
-                "user": user_uuid,
-                "movie": str(bookmark.movie),
-                "time": datetime.datetime.now(),
-            }
-        )
+        result = await Bookmarks.add(user_uuid, bookmark)
         success = True
         logger.info("Successfully added %s, user=%s, %s=%s",
                      COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark)
@@ -51,6 +43,7 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
 
 
 @router_bookmarks.post("/remove")
+@authorize
 async def remove_bookmark(bookmark: Bookmark, request: Request):
     """
     An example request JSON:
@@ -64,15 +57,8 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        result = await collection.delete_one(
-            {"user": user_uuid, "movie": str(bookmark.movie)}
-        )
+        result = await Bookmarks.remove(user_uuid, bookmark)
         success = True
         logger.info("Successfully removed %s, user=%s, %s=%s",
                      COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark)
@@ -87,6 +73,7 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
 
 
 @router_bookmarks.get("/list")
+@authorize
 async def list_bookmarks(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -103,23 +90,8 @@ async def list_bookmarks(movie: Movie, request: Request):
     """
     # TODO Make pagination.
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-
-        objects = collection.find({"movie": str(movie.id)}).sort("time", 1)
-        objects_list = [
-            {
-                "user": r["user"],
-                "movie": r["movie"],
-                "id": str(r["_id"]),
-                "time": str(r["time"]),
-            }
-            async for r in objects
-        ]
+        objects_list = await Bookmarks.list(movie)
 
         success = True
         logger.info("Successfully listed %s, user=%s, movie=%s",

@@ -33,8 +33,7 @@ async def startup_event():
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    # await kafka_producer.aioproducer.stop()
-    pass
+    mongo.mongo_client.close()
 
 
 V1 = "/v1"

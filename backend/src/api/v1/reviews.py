@@ -1,18 +1,20 @@
-import datetime
 from http import HTTPStatus
 
 import orjson
-from core.config import logger, settings
-from db.mongo import get_mongo_client
+from core.config import logger
 from fastapi import APIRouter, HTTPException
 from models.models import Movie, Review
 from starlette.requests import Request
+
+from services.reviews import Reviews
+from .common import authorize
 
 COLLECTION_NAME = "reviews"
 router_reviews = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_reviews.post("/add")
+@authorize
 async def add_review(review: Review, request: Request):
     """
     An example request JSON:
@@ -27,20 +29,8 @@ async def add_review(review: Review, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        result = await collection.insert_one(
-            {
-                "user": user_uuid,
-                "movie": str(review.movie),
-                "text": review.text,
-                "time": datetime.datetime.now(),
-            }
-        )
+        result = await Reviews.add(user_uuid, review)
         success = True
         logger.info("Successfully added %s, user=%s, %s=%s",
                      COLLECTION_NAME, user_uuid, COLLECTION_NAME, review)
@@ -53,6 +43,7 @@ async def add_review(review: Review, request: Request):
 
 
 @router_reviews.post("/remove")
+@authorize
 async def remove_review(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -66,15 +57,8 @@ async def remove_review(movie: Movie, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        result = await collection.delete_one(
-            {"user": user_uuid, "movie": str(movie.id)}
-        )
+        result = await Reviews.remove(user_uuid, movie)
         success = True
         logger.info("Successfully deleted %s, user=%s, movie=%s",
                      COLLECTION_NAME, user_uuid, movie)
@@ -88,7 +72,9 @@ async def remove_review(movie: Movie, request: Request):
     )
 
 
+# noinspection PyUnusedLocal
 @router_reviews.get("/get")
+@authorize
 async def get_review(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -102,13 +88,8 @@ async def get_review(movie: Movie, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)
-        review = await collection.find_one({"movie": str(movie.id), "user": user_uuid})
+        review = await Reviews.get(user_uuid, movie)
         if review is None:
             raise HTTPException(status_code=HTTPStatus.NOT_FOUND)
         success = True
@@ -127,6 +108,7 @@ async def get_review(movie: Movie, request: Request):
 
 
 @router_reviews.get("/list")
+@authorize
 async def list_reviews(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -143,58 +125,9 @@ async def list_reviews(movie: Movie, request: Request):
     """
     # TODO Make pagination.
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
-        client = await get_mongo_client()
-        db = client[settings.db_name]
-        collection = db.get_collection(COLLECTION_NAME)  # reviews
         sort_way = request.query_params.get("sort")
-
-        reviews = collection.find({"movie": str(movie.id)})
-        reviews_list = [
-            {
-                "user": r["user"],
-                "movie": r["movie"],
-                "id": str(r["_id"]),
-                "text": r["text"],
-                "time": str(r["time"]),
-            }
-            async for r in reviews
-        ]
-        if sort_way is not None:
-            review_likes_collection = db.get_collection("review_likes")
-            review_likes_query = review_likes_collection.aggregate(
-                [
-                    {"$match": {"movie": str(movie.id)}},
-                    {
-                        "$group": {
-                            "_id": "$review",
-                            "count": {"$count": {}},
-                            "average": {"$avg": "$value"},
-                        }
-                    },
-                ]
-            )
-            reviews_rate = {}
-            review_likes_list = await review_likes_query.to_list(length=None)
-            # async for doesn't work.
-            # async for review_line in review_likes_query:
-            #    reviews_rate[str(review_line['_id'])] = (review_line['count'], review_line['average'])
-            reviews_rate = {
-                str(rl["_id"]): (rl["count"], rl["average"]) for rl in review_likes_list
-            }
-            if len(reviews_list):
-                if sort_way == "likes_count":
-                    reviews_list.sort(key=lambda r: reviews_rate[r["id"]][0])
-                elif sort_way == "average_rate":
-                    reviews_list.sort(key=lambda r: reviews_rate[r["id"]][1])
-                else:
-                    raise HTTPException(
-                        status_code=HTTPStatus.NOT_ACCEPTABLE,
-                        detail="Unsupported sorting method",
-                    )
-
+        reviews_list = await Reviews.list(movie, sort_way)
         success = True
         logger.error("Successfylly listed %s, user=%s, movie=%s, sort_way=%s",
                      COLLECTION_NAME, user_uuid, movie, sort_way)
