@@ -8,11 +8,14 @@ from fastapi import APIRouter, HTTPException
 from models.models import Bookmark, Movie
 from starlette.requests import Request
 
+from .common import authorize
+
 COLLECTION_NAME = "bookmarks"
 router_bookmarks = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_bookmarks.post("/add")
+@authorize
 async def add_bookmark(bookmark: Bookmark, request: Request):
     """
     An example request JSON:
@@ -26,8 +29,6 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
@@ -51,6 +52,7 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
 
 
 @router_bookmarks.post("/remove")
+@authorize
 async def remove_bookmark(bookmark: Bookmark, request: Request):
     """
     An example request JSON:
@@ -64,8 +66,6 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
@@ -87,6 +87,7 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
 
 
 @router_bookmarks.get("/list")
+@authorize
 async def list_bookmarks(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -103,8 +104,6 @@ async def list_bookmarks(movie: Movie, request: Request):
     """
     # TODO Make pagination.
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]

@@ -7,11 +7,14 @@ from fastapi import APIRouter, HTTPException
 from models.models import ReviewId, ReviewLike
 from starlette.requests import Request
 
+from .common import authorize
+
 COLLECTION_NAME = "review_likes"
 router_reviewlikes = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_reviewlikes.post("/add")
+@authorize
 async def add_like(like: ReviewLike, request: Request):
     """
     An example request JSON:
@@ -25,8 +28,6 @@ async def add_like(like: ReviewLike, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="Unauthorized")
     if not (0 <= like.value <= 10):
         raise HTTPException(HTTPStatus.BAD_REQUEST, "Value must be from 0 to 10.s")
     try:
@@ -53,6 +54,7 @@ async def add_like(like: ReviewLike, request: Request):
 
 
 @router_reviewlikes.post("/remove")
+@authorize
 async def remove_like(review: ReviewId, request: Request):
     """
     An example request JSON:
@@ -66,8 +68,6 @@ async def remove_like(review: ReviewId, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
@@ -89,7 +89,8 @@ async def remove_like(review: ReviewId, request: Request):
 
 
 @router_reviewlikes.get("/count")
-async def count_likes(review: ReviewId, request: Request):
+@authorize
+async def count_likes(review: ReviewId, user_uuid, request: Request):
     """
     An example request JSON:
     {
@@ -102,8 +103,6 @@ async def count_likes(review: ReviewId, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]

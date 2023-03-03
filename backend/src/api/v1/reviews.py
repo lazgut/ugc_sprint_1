@@ -8,11 +8,14 @@ from fastapi import APIRouter, HTTPException
 from models.models import Movie, Review
 from starlette.requests import Request
 
+from .common import authorize
+
 COLLECTION_NAME = "reviews"
 router_reviews = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_reviews.post("/add")
+@authorize
 async def add_review(review: Review, request: Request):
     """
     An example request JSON:
@@ -27,8 +30,6 @@ async def add_review(review: Review, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
@@ -53,6 +54,7 @@ async def add_review(review: Review, request: Request):
 
 
 @router_reviews.post("/remove")
+@authorize
 async def remove_review(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -66,8 +68,6 @@ async def remove_review(movie: Movie, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
@@ -88,7 +88,9 @@ async def remove_review(movie: Movie, request: Request):
     )
 
 
+# noinspection PyUnusedLocal
 @router_reviews.get("/get")
+@authorize
 async def get_review(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -102,8 +104,6 @@ async def get_review(movie: Movie, request: Request):
         ...
     """
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
@@ -127,6 +127,7 @@ async def get_review(movie: Movie, request: Request):
 
 
 @router_reviews.get("/list")
+@authorize
 async def list_reviews(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -143,8 +144,6 @@ async def list_reviews(movie: Movie, request: Request):
     """
     # TODO Make pagination.
     user_uuid = request.headers.get("user_uuid")
-    if not user_uuid:
-        raise HTTPException(401, detail="Unauthorized")
     try:
         client = await get_mongo_client()
         db = client[settings.db_name]
