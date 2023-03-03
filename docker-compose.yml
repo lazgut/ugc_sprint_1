@@ -53,8 +53,8 @@ services:
       - xpack.security.enabled=false
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - discovery.type=single-node
-    ports:
-      - "9200:9200"
+    expose:
+      - "9200"
     volumes:
       - /tmp/esdata:/tmp/elasticsearch/data
     networks:
