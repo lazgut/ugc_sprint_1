@@ -7,7 +7,7 @@ from models.models import Bookmark, Movie
 from starlette.requests import Request
 
 from services.bookmarks import Bookmarks
-from .common import authorize
+from .common import check_auth
 
 
 COLLECTION_NAME = "bookmarks"
@@ -15,7 +15,6 @@ router_bookmarks = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_bookmarks.post("/add")
-@authorize
 async def add_bookmark(bookmark: Bookmark, request: Request):
     """
     An example request JSON:
@@ -28,7 +27,7 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
         user_uuid: d16b19e7-e116-43b1-a95d-cd5a11e8f1b4
         ...
     """
-    user_uuid = request.headers.get("user_uuid")
+    user_uuid = await check_auth(request)
     try:
         result = await Bookmarks.add(user_uuid, bookmark)
         success = True
@@ -43,7 +42,6 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
 
 
 @router_bookmarks.post("/remove")
-@authorize
 async def remove_bookmark(bookmark: Bookmark, request: Request):
     """
     An example request JSON:
@@ -56,7 +54,7 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
         user_uuid: d16b19e7-e116-43b1-a95d-cd5a11e8f1b4
         ...
     """
-    user_uuid = request.headers.get("user_uuid")
+    user_uuid = await check_auth(request)
     try:
         result = await Bookmarks.remove(user_uuid, bookmark)
         success = True
@@ -73,7 +71,6 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
 
 
 @router_bookmarks.get("/list")
-@authorize
 async def list_bookmarks(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -89,7 +86,7 @@ async def list_bookmarks(movie: Movie, request: Request):
         sort: likes_count | average_rate
     """
     # TODO Make pagination.
-    user_uuid = request.headers.get("user_uuid")
+    user_uuid = await check_auth(request)
     try:
         objects_list = await Bookmarks.list(movie)
 

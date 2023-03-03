@@ -7,14 +7,13 @@ from models.models import Movie, Review
 from starlette.requests import Request
 
 from services.reviews import Reviews
-from .common import authorize
+from .common import check_auth
 
 COLLECTION_NAME = "reviews"
 router_reviews = APIRouter(prefix=f"/{COLLECTION_NAME}")
 
 
 @router_reviews.post("/add")
-@authorize
 async def add_review(review: Review, request: Request):
     """
     An example request JSON:
@@ -43,7 +42,6 @@ async def add_review(review: Review, request: Request):
 
 
 @router_reviews.post("/remove")
-@authorize
 async def remove_review(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -56,7 +54,7 @@ async def remove_review(movie: Movie, request: Request):
         user_uuid: d16b19e7-e116-43b1-a95d-cd5a11e8f1b4
         ...
     """
-    user_uuid = request.headers.get("user_uuid")
+    user_uuid = await check_auth(request)
     try:
         result = await Reviews.remove(user_uuid, movie)
         success = True
@@ -74,7 +72,6 @@ async def remove_review(movie: Movie, request: Request):
 
 # noinspection PyUnusedLocal
 @router_reviews.get("/get")
-@authorize
 async def get_review(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -87,7 +84,7 @@ async def get_review(movie: Movie, request: Request):
         user_uuid: d16b19e7-e116-43b1-a95d-cd5a11e8f1b4
         ...
     """
-    user_uuid = request.headers.get("user_uuid")
+    user_uuid = await check_auth(request)
     try:
         review = await Reviews.get(user_uuid, movie)
         if review is None:
@@ -108,7 +105,6 @@ async def get_review(movie: Movie, request: Request):
 
 
 @router_reviews.get("/list")
-@authorize
 async def list_reviews(movie: Movie, request: Request):
     """
     An example request JSON:
@@ -124,7 +120,7 @@ async def list_reviews(movie: Movie, request: Request):
         sort: likes_count | average_rate
     """
     # TODO Make pagination.
-    user_uuid = request.headers.get("user_uuid")
+    user_uuid = await check_auth(request)
     try:
         sort_way = request.query_params.get("sort")
         reviews_list = await Reviews.list(movie, sort_way)

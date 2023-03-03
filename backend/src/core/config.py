@@ -17,8 +17,15 @@ class Settings(BaseSettings):
     logstash_traces_sample_rate: float = Field(1.0, env="LOGSTASH_TRACES_SAMPLE_RATE")
     mongo_dsn: str = Field("localhost", env="MONGO_DSN")
     db_name: str = Field("cinema", env="DB_NAME")
+    auth_host: str = Field("auth", env="AUTH_HOST")
+    auth_port: int = Field(5001, env="AUTH_PORT")
+    auth_secret_key: str = Field("<none>", env="JWT_SECRETE_KEY")
 
     # We get environment variables from the docker-compose, reference to .env.
+
+    @property
+    def auth_protocol_host_port(self):
+        return f"http://{self.auth_host}:{self.auth_port}"
 
 
 settings = Settings()
