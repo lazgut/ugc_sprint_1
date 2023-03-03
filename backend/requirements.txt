@@ -8,3 +8,4 @@ sentry-sdk==1.16.0
 python-logstash==0.4.8
 requests==2.28.2  # for tests.
 types-requests==2.28.11.15  # for tests
+PyJWT==2.6.0
