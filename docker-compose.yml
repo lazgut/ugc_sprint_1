@@ -131,6 +131,53 @@ services:
       - development_network
     restart: always
 
+  #region Notification
+  notificator:
+    build:
+      context: ./notification/notificator
+    expose:
+      - 5000
+    volumes:
+      - ./notification/notificator:/app  # temporary, to debug
+      - ./notification/notificator/src:/app/src  # temporary, to debug
+    depends_on:
+      - notificator_postgres
+    networks:
+      - development_network
+
+  notificator_postgres:
+    image: postgres:15.1
+    expose:
+      - 5432
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${NOTIFICATION_PG_USER}
+      POSTGRES_PASSWORD: ${NOTIFICATION_PG_PASSWORD}
+      POSTGRES_DB: notification
+    networks:
+      - development_network
+
+  events_consumer:
+    build:
+      context: ./notification/events_consumer
+    env_file:
+      - ./notification/events_consumer/.env
+    depends_on:
+      - rabbitmq
+    networks:
+      - development_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: 'rabbitmq'
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - development_network
+  #endregion
+
 networks:
   development_network:
     name: development_network
