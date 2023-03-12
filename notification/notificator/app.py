@@ -1,18 +1,20 @@
-from flask import Flask
+import logging
 
-from .src.event_action import event_page
+from src.utils.app_factory import create_app
+from config import settings
 
-app = Flask(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
+app = create_app(settings)
+
+
+# jwt = JWTManager(app)
 
 @app.route('/')
 def index():
     return 'Hello to Flask!'
 
 
-app.register_blueprint(event_page)
-
-
-# main driver function
 if __name__ == "__main__":
     app.run()
