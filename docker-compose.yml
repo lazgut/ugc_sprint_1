@@ -136,12 +136,13 @@ services:
     build:
       context: notification/notificator/
       dockerfile: Dockerfile
-    expose:
-      - ${NOTIFICATOR_PORT}
     depends_on:
       - notificator_postgres
+     # TODO add permament folder to store file patterns
     networks:
       - development_network
+    env_file:
+       - ".env"
 
   notificator_postgres:
     image: postgres:15.1
@@ -178,6 +179,18 @@ services:
     networks:
       - development_network
   #endregion
+  tests:  # TODO To another file?
+    build:
+      context: notification/tests/
+      dockerfile: Dockerfile
+    depends_on:
+      - notificator_postgres
+      - events_consumer
+    networks:
+      - development_network
+    env_file:
+      - ".env"
+      - "./notification/events_consumer/.env"
 
 networks:
   development_network:

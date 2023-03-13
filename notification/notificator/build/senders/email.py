@@ -5,7 +5,7 @@ from http import HTTPStatus
 
 from jinja2 import Environment, FileSystemLoader
 
-from config import settings
+from build.config import settings
 
 
 class EmailSender:

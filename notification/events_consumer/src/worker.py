@@ -5,6 +5,7 @@ import pika
 import requests
 
 logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 class Worker:
@@ -15,7 +16,8 @@ class Worker:
     def callback(self, ch, method, properties, body):
         print(" [x] Received %r" % body.decode())
         try:
-            result = requests.post(self.url, data=body)
+            print(f"url: {self.url}")
+            result = requests.post(self.url, data=body, headers={"Content-Type": "application/json"})
             print(result.text)
         except requests.exceptions.RequestException as e:
             logger.error(str(e))
@@ -24,6 +26,7 @@ class Worker:
 
     def main(self):
         broker_host = os.environ['BROKER_HOST']
+        logger.info("Connecting to %s", broker_host)
         queue_name = os.environ['QUEUE_NAME']
         connection = pika.BlockingConnection(pika.ConnectionParameters(broker_host))
         channel = connection.channel()
@@ -32,7 +35,7 @@ class Worker:
         channel.basic_consume(queue=queue_name, on_message_callback=self.callback)
         # channel.basic_qos(prefetch_count=1)
         # use this ^ for balance loading between several consumers, it is not out case.
-
+        print("Starting...")
         channel.start_consuming()
 
 

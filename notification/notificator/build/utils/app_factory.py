@@ -1,6 +1,6 @@
 from flask import Flask
 
-from config import Settings
+from build.config import Settings
 from build.utils.routing import register_endpoints
 
 
