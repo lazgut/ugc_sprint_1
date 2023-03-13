@@ -1,7 +1,7 @@
 from flask import Flask
 
 from config import Settings
-from src.utils.routing import register_endpoints
+from build.utils.routing import register_endpoints
 
 
 def create_app(settings: Settings) -> Flask:

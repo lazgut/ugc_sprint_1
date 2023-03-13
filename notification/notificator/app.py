@@ -1,6 +1,6 @@
 import logging
 
-from src.utils.app_factory import create_app
+from build.utils.app_factory import create_app
 from config import settings
 
 logger = logging.getLogger()
@@ -11,9 +11,10 @@ app = create_app(settings)
 
 # jwt = JWTManager(app)
 
-@app.route('/')
+
+@app.route("/")
 def index():
-    return 'Hello to Flask!'
+    return "Hello to Flask!"
 
 
 if __name__ == "__main__":

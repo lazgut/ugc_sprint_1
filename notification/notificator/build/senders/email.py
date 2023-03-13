@@ -1,6 +1,8 @@
 import os
 import smtplib
 from email.message import EmailMessage
+from http import HTTPStatus
+
 from jinja2 import Environment, FileSystemLoader
 
 from config import settings
@@ -14,8 +16,8 @@ class EmailSender:
                   html_template: str,
                   title: str,
                   text: str,
-                  image: str
-                  ):
+                  image: str = ""
+                  ) -> (str, HTTPStatus):  # type: ignore
         server = smtplib.SMTP_SSL('smtp.yandex.ru', 465)
         server.login(settings.email_user, settings.email_password)
 
@@ -36,3 +38,4 @@ class EmailSender:
         message.add_alternative(output, subtype='html')
         server.sendmail(settings.email_user, destination, message.as_string())
         server.close()
+        return "Success", HTTPStatus.OK
