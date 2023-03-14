@@ -1,14 +1,13 @@
 create table if not exists notification_pattern
 (
-    id           serial primary key
+    id           serial primary key,
     type_         smallint     not null,
     pattern_file varchar(100) not null,
     actual_time  integer,
-    settings     json,
-
+    settings     json
 );
 
-comment on column notification_pattern.type is 'by event / by time / manual';
+comment on column notification_pattern.type_ is 'by event / by time / manual';
 
 comment on column notification_pattern.pattern_file is 'A path to the pattern file';
 

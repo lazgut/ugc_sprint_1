@@ -20,6 +20,8 @@ services:
         max-size: "100m"
     networks:
       - development_network
+    restart: always
+
 
   auth:
     build:
@@ -35,6 +37,7 @@ services:
     depends_on:
       - postgres
       - redis
+    restart: always
 
   postgres:
     image: postgres:15.1
@@ -51,6 +54,7 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - development_network
+    restart: always
 
   redis:
     image: redis:7.0.5
@@ -71,6 +75,7 @@ services:
       - ~/tmp/mongo_single/data1:/data/db
     networks:
       - development_network
+    restart: always
 
   logstash:
     image: logstash:7.10.1
@@ -143,6 +148,7 @@ services:
       - development_network
     env_file:
        - ".env"
+    restart: always
 
   notificator_postgres:
     image: postgres:15.1
@@ -157,8 +163,9 @@ services:
     networks:
       - development_network
     volumes:
-      - ./notification_data:/var/lib/postgresql/data
       - ./notification/notificator/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./notification_data:/var/lib/postgresql/data
+    restart: always
 
   events_consumer:
     build:
@@ -169,6 +176,7 @@ services:
       - rabbitmq
     networks:
       - development_network
+    restart: always
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -178,6 +186,7 @@ services:
       - ./rabbitmq/log/:/var/log/rabbitmq/
     networks:
       - development_network
+    restart: always
   #endregion
   tests:  # TODO To another file?
     build:
