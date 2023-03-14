@@ -3,6 +3,8 @@ from pydantic import BaseSettings, Field
 
 class Settings(BaseSettings):
     debug: bool = Field(False, env="DEBUG")
+    host: str = Field("0.0.0.0", env="NOTIFICATOR_HOST")
+    port: int = Field(5000, env="NOTIFICATOR_PORT")
     email_user: str = Field("example@email.com", env="EMAIL_USER")
     email_password: str = Field("password", env="EMAIL_PASSWORD")
     postgres_host: str = Field("notificator_postgres", env="NOTIFICATION_PG_HOST")

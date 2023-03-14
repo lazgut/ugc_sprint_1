@@ -143,6 +143,7 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - notificator_postgres
+      - rabbitmq
      # TODO add permament folder to store file patterns
     networks:
       - development_network
@@ -181,6 +182,11 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: 'rabbitmq'
+    healthcheck:
+      test: rabbitmq-diagnostics -q alarm
+      interval: 30s
+      timeout: 30s
+      retries: 3
     volumes:
       - ./rabbitmq/:/var/lib/rabbitmq/
       - ./rabbitmq/log/:/var/log/rabbitmq/

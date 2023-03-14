@@ -5,7 +5,9 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED=1
 
+COPY run_uwsgi.sh run_uwsgi.sh
 COPY requirements.txt requirements.txt
+COPY uwsgi/uwsgi.ini uwsgi.ini
 
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
@@ -13,5 +15,4 @@ RUN pip install --upgrade pip \
 COPY app.py app.py
 COPY build build
 
-ENTRYPOINT [ "flask", "run","--host","0.0.0.0","--port","5000"]
-# TODO Use uwsgi.
+ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
