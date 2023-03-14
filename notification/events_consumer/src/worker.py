@@ -23,7 +23,7 @@ class Worker:
 
     def callback(self, ch, method, properties, body):
         try:
-            result = requests.post(self.url, data=json.loads(body), headers={"Content-Type": "application/json"})
+            result = requests.post(self.url, json=json.loads(body), headers={"Content-Type": "application/json"})
             ch.basic_ack(delivery_tag=method.delivery_tag)
             logger.info(result.text)
         except requests.exceptions.RequestException as e:
