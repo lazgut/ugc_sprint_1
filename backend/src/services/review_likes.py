@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from models.models import ReviewLike
+
 from .common import Service
 
 
@@ -15,17 +16,13 @@ class ReviewLikes(Service):
             "review": str(like.review),
             "movie": str(like.movie),
         }
-        result = await collection.update_one(
-            main_idx, {"$set": {"value": like.value}}, upsert=True
-        )
+        result = await collection.update_one(main_idx, {"$set": {"value": like.value}}, upsert=True)
         return result
 
     @classmethod
     async def remove(cls, user_uuid, review):
         collection = await cls.get_collection()
-        result = await collection.delete_one(
-            {"user": user_uuid, "review": str(review.id)}
-        )
+        result = await collection.delete_one({"user": user_uuid, "review": str(review.id)})
         return result
 
     @classmethod

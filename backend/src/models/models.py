@@ -1,9 +1,9 @@
 import uuid
+
 from .common import BaseOrjsonModel
 
 # No need to pass 'user' here, this is for FastApi, user uuid comes
 # from the request header.
-
 
 
 class Movie(BaseOrjsonModel):
@@ -12,7 +12,6 @@ class Movie(BaseOrjsonModel):
 
 class Like(BaseOrjsonModel):
     movie: uuid.UUID
-    # user: uuid.UUID
     value: int  # 0-10
 
 
@@ -29,7 +28,7 @@ class ReviewId(BaseOrjsonModel):
 class ReviewLike(BaseOrjsonModel):
     movie: uuid.UUID
     review: str
-    # user: uuid.UUID
+    review_author_id: uuid.UUID
     value: int  # 0-10
 
 

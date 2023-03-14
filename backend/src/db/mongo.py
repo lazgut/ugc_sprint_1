@@ -4,7 +4,6 @@ import motor.motor_asyncio
 import pymongo
 from core.config import logger, settings
 
-
 mongo_client: Optional[motor.motor_asyncio.AsyncIOMotorClient] = None
 
 
@@ -32,13 +31,9 @@ async def create_indices(_mongo_client: motor.motor_asyncio.AsyncIOMotorClient):
         if collection_name in collections:
             collection = db.get_collection(collection_name)
         else:
-            collection: motor.MotorCollection = await db.create_collection(
-                collection_name
-            )
+            collection: motor.MotorCollection = await db.create_collection(collection_name)
 
-        await collection.create_index(
-            [("user", pymongo.ASCENDING), (field2, pymongo.ASCENDING)], unique=True
-        )
+        await collection.create_index([("user", pymongo.ASCENDING), (field2, pymongo.ASCENDING)], unique=True)
         await collection.create_index(field2)
         return collection
 

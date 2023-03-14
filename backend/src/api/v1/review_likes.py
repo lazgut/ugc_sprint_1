@@ -1,14 +1,15 @@
 from http import HTTPStatus
 
 import orjson
-
-from core.config import logger
+from brokers.rabbitmq_publish import rabbitmq_publish
+from core.config import logger, settings
 from fastapi import APIRouter, HTTPException
+from helpers.uuid_generate import generate_uuid
 from models.models import ReviewId, ReviewLike
-from starlette.requests import Request
 from services.review_likes import ReviewLikes
-from .common import check_auth
+from starlette.requests import Request
 
+from .common import check_auth
 
 COLLECTION_NAME = "review_likes"
 router_reviewlikes = APIRouter(prefix=f"/{COLLECTION_NAME}")
@@ -19,7 +20,10 @@ async def add_like(like: ReviewLike, request: Request):
     """
     An example request JSON:
     {
-    "review": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
+    "review": "63ff480aa96c3ea499bc01242",
+    "movie":  "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
+    "review_author_id": "d96f4d59-12d4-419c-967d-fd62c41cc6b0",
+    "value": 5
     }
     We assume that request headers contain used_uuid, after processing with authentication and middleware.
     Headers:
@@ -34,8 +38,10 @@ async def add_like(like: ReviewLike, request: Request):
         result = await ReviewLikes.add(user_uuid, like)
 
         success = True
-        logger.info("Successfully added %s, user=%s, %s=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, like)
+        logger.info("Successfully added %s, user=%s, %s=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, like)
+
+        rabbitmq_publish(settings.rabbitmq_queue, str(like.review_author_id))
+
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
@@ -60,16 +66,14 @@ async def remove_like(review: ReviewId, request: Request):
     try:
         result = await ReviewLikes.remove(user_uuid, review)
         success = True
-        logger.info("Successfully deleted %s, user=%s, review=%s",
-                     COLLECTION_NAME, user_uuid, review)
+        logger.info("Successfully deleted %s, user=%s, review=%s", COLLECTION_NAME, user_uuid, review)
     except Exception as e:
-        logger.error("Error removing %s, user=%s, %s=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, review, e)
+        logger.error(
+            "Error removing %s, user=%s, %s=%s, error=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, review, e
+        )
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return orjson.dumps(
-        {"success": success, "deleted_count": str(result.deleted_count)}
-    )
+    return orjson.dumps({"success": success, "deleted_count": str(result.deleted_count)})
 
 
 @router_reviewlikes.get("/count")
@@ -89,11 +93,9 @@ async def count_likes(review: ReviewId, user_uuid, request: Request):
     try:
         count, average = ReviewLikes.count(review=review)
         success = True
-        logger.info("Succesfully counted %s, user=%s, review=%s",
-                     COLLECTION_NAME, user_uuid, review)
+        logger.info("Succesfully counted %s, user=%s, review=%s", COLLECTION_NAME, user_uuid, review)
     except Exception as e:
-        logger.error("Error counting %s, user=%s, review=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, review, e)
+        logger.error("Error counting %s, user=%s, review=%s, error=%s", COLLECTION_NAME, user_uuid, review, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
     return orjson.dumps({"success": success, "count": count, "average": average})

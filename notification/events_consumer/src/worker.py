@@ -1,5 +1,6 @@
-import os
+import json
 import logging
+import os
 
 import pika
 import requests
@@ -10,35 +11,38 @@ logger.setLevel(logging.INFO)
 
 class Worker:
     def __init__(self):
+        # TODO delete this comment
+        # os.environ["NOTIFICATOR_HOST"] = '0.0.0.0'
+        # os.environ["NOTIFICATOR_PORT"] = '5000'
+        # os.environ["ON_EVENT_URL"] = 'v1/manual_sender'
+        # os.environ['BROKER_HOST'] = '0.0.0.0'
+        # os.environ['QUEUE_NAME'] = 'ugc_events'
+
         host_port = f'http://{os.environ["NOTIFICATOR_HOST"]}:{os.environ["NOTIFICATOR_PORT"]}'
         self.url = f'{host_port}{os.environ["ON_EVENT_URL"]}'
 
     def callback(self, ch, method, properties, body):
-        print(" [x] Received %r" % body.decode())
         try:
-            print(f"url: {self.url}")
-            result = requests.post(self.url, data=body, headers={"Content-Type": "application/json"})
-            print(result.text)
+            result = requests.post(self.url, data=json.loads(body), headers={"Content-Type": "application/json"})
+            ch.basic_ack(delivery_tag=method.delivery_tag)
+            logger.info(result.text)
         except requests.exceptions.RequestException as e:
             logger.error(str(e))
 
-        ch.basic_ack(delivery_tag=method.delivery_tag)
-
     def main(self):
-        broker_host = os.environ['BROKER_HOST']
+        broker_host = os.environ["BROKER_HOST"]
         logger.info("Connecting to %s", broker_host)
-        queue_name = os.environ['QUEUE_NAME']
+        queue_name = os.environ["QUEUE_NAME"]
         connection = pika.BlockingConnection(pika.ConnectionParameters(broker_host))
         channel = connection.channel()
 
         channel.queue_declare(queue=queue_name, durable=True)
-        channel.basic_consume(queue=queue_name, on_message_callback=self.callback)
-        # channel.basic_qos(prefetch_count=1)
-        # use this ^ for balance loading between several consumers, it is not out case.
-        print("Starting...")
+        channel.basic_consume(queue=queue_name, on_message_callback=self.callback, auto_ack=False)
+        channel.basic_qos(prefetch_count=1)
+
         channel.start_consuming()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     worker = Worker()
     worker.main()

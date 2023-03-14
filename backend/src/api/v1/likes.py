@@ -4,11 +4,10 @@ import orjson
 from core.config import logger
 from fastapi import APIRouter, HTTPException
 from models.models import Like, Movie
+from services.likes import Likes
 from starlette.requests import Request
 
-from services.likes import Likes
 from .common import check_auth
-
 
 COLLECTION_NAME = "likes"
 router_likes = APIRouter(prefix=f"/{COLLECTION_NAME}")
@@ -20,6 +19,8 @@ async def add_like(like: Like, request: Request):
     An example request JSON:
     {
     "movie": "803c794c-ddf0-482d-b2c2-6fa92da4c5e2",
+    "author_id": "d16b19e7-e116-43b1-a95d-cd5a11e8f1b4",
+    "value": 5
     }
     We assume that request headers contain used_uuid, after processing with authentication and middleware.
     Headers:
@@ -34,11 +35,9 @@ async def add_like(like: Like, request: Request):
         result = await Likes.add(user_uuid, like)
 
         success = True
-        logger.info("Successfully added %s, user=%s, %s=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, like)
+        logger.info("Successfully added %s, user=%s, %s=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, like)
     except Exception as e:
-        logger.error("Error adding %s, user=%s, %s=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, like, e)
+        logger.error("Error adding %s, user=%s, %s=%s, error=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, like, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
     return orjson.dumps({"success": success, "upserted_id": str(result.upserted_id)})
@@ -61,16 +60,12 @@ async def remove_like(movie: Movie, request: Request):
     try:
         result = await Likes.remove(user_uuid, movie)
         success = True
-        logger.info("Successfully deleted %s, user=%s, movie=%s",
-                     COLLECTION_NAME, user_uuid, movie)
+        logger.info("Successfully deleted %s, user=%s, movie=%s", COLLECTION_NAME, user_uuid, movie)
     except Exception as e:
-        logger.error("Error removing %s, user=%s, movie=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, movie, e)
+        logger.error("Error removing %s, user=%s, movie=%s, error=%s", COLLECTION_NAME, user_uuid, movie, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return orjson.dumps(
-        {"success": success, "deleted_count": str(result.deleted_count)}
-    )
+    return orjson.dumps({"success": success, "deleted_count": str(result.deleted_count)})
 
 
 @router_likes.get("/count")
@@ -90,11 +85,9 @@ async def count_likes(movie: Movie, request: Request):
     try:
         count, average = await Likes.count(movie)
         success = True
-        logger.info("Successfully counted %s, user=%s, movie=%s",
-                     COLLECTION_NAME, user_uuid, movie)
+        logger.info("Successfully counted %s, user=%s, movie=%s", COLLECTION_NAME, user_uuid, movie)
     except Exception as e:
-        logger.error("Error getting %s, user=%s, movie=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, movie, e)
+        logger.error("Error getting %s, user=%s, movie=%s, error=%s", COLLECTION_NAME, user_uuid, movie, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
     return orjson.dumps({"success": success, "count": count, "average": average})

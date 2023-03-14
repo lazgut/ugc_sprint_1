@@ -24,9 +24,7 @@ class Reviews(Service):
     @classmethod
     async def remove(cls, user_uuid, movie: Movie):
         collection = await cls.get_collection()
-        result = await collection.delete_one(
-            {"user": user_uuid, "movie": str(movie.id)}
-        )
+        result = await collection.delete_one({"user": user_uuid, "movie": str(movie.id)})
         return result
 
     @classmethod
@@ -36,8 +34,7 @@ class Reviews(Service):
         return review
 
     @classmethod
-    async def list(cls, movie: Movie,
-                   sort_way: Optional[Literal["likes_count", "average_rate"]]) -> list[dict]:
+    async def list(cls, movie: Movie, sort_way: Optional[Literal["likes_count", "average_rate"]]) -> list[dict]:
         """
         Can raise ValueError.
         Returns review list sorted.
@@ -73,9 +70,7 @@ class Reviews(Service):
             # async for doesn't work.
             # async for review_line in review_likes_query:
             #    reviews_rate[str(review_line['_id'])] = (review_line['count'], review_line['average'])
-            reviews_rate = {
-                str(rl["_id"]): (rl["count"], rl["average"]) for rl in review_likes_list
-            }
+            reviews_rate = {str(rl["_id"]): (rl["count"], rl["average"]) for rl in review_likes_list}
             if len(reviews_list):
                 if sort_way == "likes_count":
                     reviews_list.sort(key=lambda r: reviews_rate[r["id"]][0])

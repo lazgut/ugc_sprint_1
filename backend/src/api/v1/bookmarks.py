@@ -4,11 +4,10 @@ import orjson
 from core.config import logger
 from fastapi import APIRouter, HTTPException
 from models.models import Bookmark, Movie
+from services.bookmarks import Bookmarks
 from starlette.requests import Request
 
-from services.bookmarks import Bookmarks
 from .common import check_auth
-
 
 COLLECTION_NAME = "bookmarks"
 router_bookmarks = APIRouter(prefix=f"/{COLLECTION_NAME}")
@@ -31,11 +30,11 @@ async def add_bookmark(bookmark: Bookmark, request: Request):
     try:
         result = await Bookmarks.add(user_uuid, bookmark)
         success = True
-        logger.info("Successfully added %s, user=%s, %s=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark)
+        logger.info("Successfully added %s, user=%s, %s=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark)
     except Exception as e:
-        logger.error("Error adding %s, user=%s, %s=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark, e)
+        logger.error(
+            "Error adding %s, user=%s, %s=%s, error=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark, e
+        )
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
     return orjson.dumps({"success": success, "inserted_id": str(result.inserted_id)})
@@ -58,16 +57,14 @@ async def remove_bookmark(bookmark: Bookmark, request: Request):
     try:
         result = await Bookmarks.remove(user_uuid, bookmark)
         success = True
-        logger.info("Successfully removed %s, user=%s, %s=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark)
+        logger.info("Successfully removed %s, user=%s, %s=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark)
     except Exception as e:
-        logger.error("Error removing %s, user=%s, %s=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark, e)
+        logger.error(
+            "Error removing %s, user=%s, %s=%s, error=%s", COLLECTION_NAME, user_uuid, COLLECTION_NAME, bookmark, e
+        )
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
-    return orjson.dumps(
-        {"success": success, "deleted_count": str(result.deleted_count)}
-    )
+    return orjson.dumps({"success": success, "deleted_count": str(result.deleted_count)})
 
 
 @router_bookmarks.get("/list")
@@ -91,13 +88,11 @@ async def list_bookmarks(movie: Movie, request: Request):
         objects_list = await Bookmarks.list(movie)
 
         success = True
-        logger.info("Successfully listed %s, user=%s, movie=%s",
-                     COLLECTION_NAME, user_uuid, movie)
+        logger.info("Successfully listed %s, user=%s, movie=%s", COLLECTION_NAME, user_uuid, movie)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error listing %s, user=%s, movie=%s, error=%s",
-                     COLLECTION_NAME, user_uuid, movie, e)
+        logger.error("Error listing %s, user=%s, movie=%s, error=%s", COLLECTION_NAME, user_uuid, movie, e)
         raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=str(e))
 
     return orjson.dumps({"success": success, COLLECTION_NAME: objects_list})

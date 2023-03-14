@@ -1,7 +1,7 @@
 import logging
 
-from build.utils.app_factory import create_app
 from build.config import settings
+from build.utils.app_factory import create_app
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

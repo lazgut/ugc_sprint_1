@@ -1,6 +1,7 @@
 from typing import Tuple
 
 from models.models import Like, Movie
+
 from .common import Service
 
 
@@ -11,17 +12,13 @@ class Likes(Service):
     async def add(cls, user_uuid, like: Like):
         collection = await cls.get_collection()
         main_idx = {"user": user_uuid, "movie": str(like.movie)}
-        result = await collection.update_one(
-            main_idx, {"$set": {"value": like.value}}, upsert=True
-        )
+        result = await collection.update_one(main_idx, {"$set": {"value": like.value}}, upsert=True)
         return result
 
     @classmethod
     async def remove(cls, user_uuid, movie):
         collection = await cls.get_collection()
-        result = await collection.delete_one(
-            {"user": user_uuid, "movie": str(movie.id)}
-        )
+        result = await collection.delete_one({"user": user_uuid, "movie": str(movie.id)})
         return result
 
     @classmethod

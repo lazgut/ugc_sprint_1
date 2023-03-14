@@ -1,6 +1,7 @@
 import datetime
 
 from models.models import Bookmark
+
 from .common import Service
 
 
@@ -19,13 +20,10 @@ class Bookmarks(Service):
         )
         return result
 
-
     @classmethod
     async def remove(cls, user_uuid, bookmark: Bookmark):
         collection = await cls.get_collection()
-        result = await collection.delete_one(
-            {"user": user_uuid, "movie": str(bookmark.movie)}
-        )
+        result = await collection.delete_one({"user": user_uuid, "movie": str(bookmark.movie)})
         return result
 
     @classmethod
