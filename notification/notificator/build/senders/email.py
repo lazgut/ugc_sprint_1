@@ -26,7 +26,7 @@ class EmailSender:
         message["To"] = destination
         message["Subject"] = subject
 
-        path = f'{os.path.dirname(__file__)}/html_template'
+        path = f'{os.path.dirname(__file__)}/html_template'  # TODO to config
 
         env = Environment(loader=FileSystemLoader(path))  # расположение шаблонов
         template = env.get_template(html_template)  # Загружаем нужный шаблон в переменную
