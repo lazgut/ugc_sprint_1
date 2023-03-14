@@ -18,7 +18,7 @@ class EmailSender:
                   text: str,
                   image: str = ""
                   ) -> (str, HTTPStatus):  # type: ignore
-        server = smtplib.SMTP_SSL('smtp.yandex.ru', 465)
+        server = smtplib.SMTP_SSL(settings.smtp_server, settings.smtp_server_port)
         server.login(settings.email_user, settings.email_password)
 
         message = EmailMessage()

@@ -1,11 +1,14 @@
 import logging
 from flask import Blueprint, request
+
+from .resources.parsers.event_action import manual_sender_parser
 from .senders.email import EmailSender
 from .db.helper import db_helper
 
 
 V1 = "/v1"
 event_page = Blueprint('event_page', __name__, url_prefix=V1)
+manual = Blueprint('manual', __name__, url_prefix=V1)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -31,3 +34,14 @@ def on_event():
     logger.info(f"route works, data: %s", request.data)
     return f"route works, data: {request.data}"
 
+
+@manual.route('/manual_sender', methods=['POST'])
+def manual_sender():
+    data = manual_sender_parser.parse_args()
+    payload, status = EmailSender.send_mail(data['destination'],
+                                            data['subject'],
+                                            data['html_template'],
+                                            data['title'],
+                                            data['text'],
+                                            data['image'])
+    return payload, status
