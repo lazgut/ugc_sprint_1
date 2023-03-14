@@ -1,6 +1,7 @@
 import datetime
 from enum import IntEnum
 import json
+from typing import Iterable
 
 from .connection import connection
 
@@ -36,5 +37,13 @@ class DBHelper:
         data = (pattern_id, json.dumps({"message_id": message_id}), datetime.datetime.now())
         cur.execute(sql, data)
         self.connection.commit()
+
+    def get_time_patterns(self) -> Iterable[dict]:
+        sql = f"SELECT * FROM notification_pattern WHERE type_={InvokationType.BY_TIME.value}"
+        cur = self.connection.cursor()
+        cur.execute(sql)
+        result = cur.fetchall()
+        return list(result)
+
 
 db_helper = DBHelper(connection)

@@ -164,7 +164,7 @@ services:
     build:
       context: ./notification/events_consumer
     env_file:
-      - ./notification/events_consumer/.env
+      - ./.env
     depends_on:
       - rabbitmq
     networks:
@@ -190,7 +190,7 @@ services:
       - development_network
     env_file:
       - ".env"
-      - "./notification/events_consumer/.env"
+
 
 networks:
   development_network:
