@@ -20,6 +20,7 @@ Link to the project: https://github.com/dondublon/ugc_sprint_1-1
 Конкретное событие посылки попадает в notofication_event. 
 
 Имеется интеграционный тест. 
+Идемпонетноость обеспечивается проверкой message_id (уникальное для rabbit_mq.)
 
 ## Отказоуйстойчивость
 Отказоуйстойчивость обеспечивается двумя очередями rabbitmq+event_consumer. 
