@@ -36,4 +36,8 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+  rabbitmq_dlq:
+    ports:
+      - 5673:5672
+      - 15673:15672
   # endregion

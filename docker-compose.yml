@@ -169,12 +169,27 @@ services:
     restart: always
 
   events_consumer:
+    container_name: 'events_consumer'
     build:
       context: ./notification/events_consumer
     env_file:
       - ./.env
     depends_on:
       - rabbitmq
+    networks:
+      - development_network
+    restart: always
+
+  events_consumer_dlq:
+    container_name: 'events_consumer_dlq'
+    build:
+      context: ./notification/events_consumer
+    env_file:
+      - ./.env
+    environment:
+      BROKER_HOST: rabbitmq_dlq
+    depends_on:
+      - rabbitmq_dlq
     networks:
       - development_network
     restart: always
@@ -193,6 +208,22 @@ services:
     networks:
       - development_network
     restart: always
+
+  rabbitmq_dlq:
+    image: rabbitmq:3-management
+    container_name: 'rabbitmq_dlq'
+    healthcheck:
+      test: rabbitmq-diagnostics -q alarm
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    volumes:
+      - ./rabbitmq_dlq/:/var/lib/rabbitmq/
+      - ./rabbitmq_dlq/log/:/var/log/rabbitmq/
+    networks:
+      - development_network
+    restart: always
+
   #endregion
   tests:  # TODO To another file?
     build:

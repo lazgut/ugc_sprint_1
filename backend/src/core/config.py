@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     auth_port: int = Field(5001, env="AUTH_PORT")
     auth_secret_key: str = Field("foo", env="JWT_SECRETE_KEY")
     auth_url: str = Field("/api/v1/user/login", env="AUTH_URL")
-    rabbitmq_host: str = Field("rabbitmq", env="RABBITMQ_HOST")
+    rabbitmq_host: str = Field("rabbitmq", env="BROKER_HOST")
     rabbitmq_queue: str = Field("ugc_events", env="QUEUE_NAME")
 
     # We get environment variables from the docker-compose, reference to .env.
