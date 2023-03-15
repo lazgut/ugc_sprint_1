@@ -1,6 +1,7 @@
 import orjson
-from core.config import logger
 from fastapi import APIRouter
+
+from core.config import logger
 
 router = APIRouter()
 

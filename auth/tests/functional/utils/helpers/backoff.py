@@ -3,6 +3,8 @@ import logging
 
 from functools import wraps
 
+from flask import current_app
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,17 +19,17 @@ def backoff(
             try:
                 return func(*args, **kwargs)
             except Exception as error:
-                logger.error(f"Failed {func.__name__} with {str(error)}")
+                current_app.logger.error(f"Failed {func.__name__} with {str(error)}")
                 n = waiting = 0
                 while True:
                     try:
                         return func(*args, **kwargs)
                     except Exception as error:
-                        logger.error(f"Failed {func.__name__} with {str(error)}")
+                        current_app.logger.error(f"Failed {func.__name__} with {str(error)}")
                         if waiting < border_sleep_time:
                             n += 1
                             waiting = start_sleep_time * factor**n
-                        logger.warning(
+                        current_app.logger.warning(
                             f"{func.__name__} restarts after {waiting} seconds"
                         )
                         time.sleep(waiting)

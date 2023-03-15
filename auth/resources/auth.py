@@ -1,12 +1,13 @@
 from http import HTTPStatus
+
+from flask import current_app
 from flask_jwt_extended import (
     get_jwt_identity,
     jwt_required,
     get_jwt,
 )
-from flask_restful import Resource, reqparse
+from flask_restful import Resource
 
-from app import logger
 from resources.parsers.auth import register_parser, auth_parser
 from services.user_service import UserService, JWTs
 from utils.namespaces import registration, login, refresh, logout
@@ -39,7 +40,7 @@ class Authorization(Resource):
             data["login"], data["password"], data.get("User-Agent"), data.get("Device")
         )
         if status == HTTPStatus.OK and isinstance(payload, JWTs):
-            logger.info(f"{data['login']} successful authorization")
+            current_app.logger.info(f"{data['login']} successful authorization")
             return payload.dict(), status
         return payload, status
 

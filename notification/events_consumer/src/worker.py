@@ -23,6 +23,7 @@ class Worker:
 
     def callback(self, ch, method, properties, body):
         try:
+            logger.info(body)
             result = requests.post(self.url, json=json.loads(body), headers={"Content-Type": "application/json"})
             ch.basic_ack(delivery_tag=method.delivery_tag)
             logger.info(result.text)

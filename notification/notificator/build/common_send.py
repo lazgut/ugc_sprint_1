@@ -2,9 +2,7 @@ import logging
 from typing import Iterable
 
 from build.senders.email import EmailSender
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from flask import current_app
 
 
 def send_all(users: Iterable[dict], patterns):
@@ -28,4 +26,4 @@ def send_email(user: dict, pattern):
     settings_ = pattern["settings_"]
     EmailSender.send_mail(addresses, settings_["subject"], file_pattern, settings_["title"],
                           settings_["text"], settings_["image"])
-    logger.info(f"Sent to {addresses}, {file_pattern}, {settings_}")
+    current_app.logger.info(f"Sent to {addresses}, {file_pattern}, {settings_}")

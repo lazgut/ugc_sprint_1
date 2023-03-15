@@ -7,7 +7,7 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
 )
-from flask import abort
+from flask import abort, current_app
 from pydantic import BaseModel
 from sqlalchemy.exc import DataError
 
@@ -86,7 +86,7 @@ class UserService:
             # TODO: notification about register
             return tokens.dict(), HTTPStatus.CREATED
         except Exception as error:
-            logger.error(error)
+            current_app.logger.error(error)
             return abort(HTTPStatus.INTERNAL_SERVER_ERROR, "Something went wrong")
 
     @classmethod

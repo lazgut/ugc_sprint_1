@@ -1,10 +1,12 @@
 import logging
-from logging import getLogger
+from logging import config as logging_config
 
 import logstash
-from brokers.rabbitmq import RabbitmqConnection
 from pydantic import BaseSettings, Field
 
+from core.logger import LOGGING
+
+logging_config.dictConfig(LOGGING)
 
 class Settings(BaseSettings):
     retry_backoff_ms: int = Field(1000, env="RETRY_BACKOFF_MS")
@@ -33,10 +35,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-logger = getLogger(__name__)
+
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(logstash.LogstashHandler(settings.logstash_host, settings.logstash_port, version=1, tags="backend"))
-
-rabbitmq = RabbitmqConnection(settings.rabbitmq_host)
-rabbitmq_conn = rabbitmq.init_rabbitmq_connection()
-rabbitmq_channel = rabbitmq_conn.channel()

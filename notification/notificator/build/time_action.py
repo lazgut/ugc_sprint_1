@@ -3,6 +3,7 @@ from logging import getLogger
 from typing import Iterable
 
 import psycopg
+from flask import current_app
 from psycopg.rows import dict_row
 
 from build.config import settings
@@ -38,7 +39,7 @@ def on_time():
         # Place check here, is we really need to send something
         # We need to scan notification_patterns, read condition there
         # then scan our UGC database and check for condition is True.
-        logger.info("Invoked on time")
+        current_app.logger.info("Invoked on time")
         users = get_all_users()
         patterns = db_helper.get_time_patterns()
         send_all(users, patterns)

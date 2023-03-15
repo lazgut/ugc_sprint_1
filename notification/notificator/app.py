@@ -4,9 +4,6 @@ from build.config import settings
 from build.utils.app_factory import create_app
 from build import scheduler # <- Shedule starts here
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
 app = create_app(settings)
 
 

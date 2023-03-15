@@ -1,5 +1,5 @@
 import logging
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 
 from .resources.parsers.event_action import manual_sender_parser
 from .senders.email import EmailSender
@@ -9,8 +9,6 @@ from .db.helper import db_helper
 V1 = "/v1"
 event_page = Blueprint('event_page', __name__, url_prefix=V1)
 manual = Blueprint('manual', __name__, url_prefix=V1)
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 @event_page.route('/on_event', methods=['POST'])
 def on_event():
@@ -31,7 +29,7 @@ def on_event():
         image = 'https://upload.wikimedia.org/wikipedia/ru/4/4d/Wojak.png'
 
         EmailSender.send_mail(destination, subject, html_template, title, text, image)
-    logger.info(f"route works, data: %s", request.data)
+    current_app.logger.info(f"route works, data: %s", request.data)
     return f"route works, data: {request.data}"
 
 
@@ -44,4 +42,5 @@ def manual_sender():
                                             data['title'],
                                             data['text'],
                                             data['image'])
+    current_app.logger.info("Successful")
     return payload, status

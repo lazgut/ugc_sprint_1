@@ -1,8 +1,10 @@
+import logging
 from http import HTTPStatus
 
 import orjson
-from core.config import logger
 from fastapi import APIRouter, HTTPException
+
+from core.config import logger
 from models.models import Like, Movie
 from services.likes import Likes
 from starlette.requests import Request

@@ -2,9 +2,8 @@ from http import HTTPStatus
 
 import orjson
 from brokers.rabbitmq_publish import rabbitmq_publish
-from core.config import logger, settings
+from core.config import settings, logger
 from fastapi import APIRouter, HTTPException
-from helpers.uuid_generate import generate_uuid
 from models.models import ReviewId, ReviewLike
 from services.review_likes import ReviewLikes
 from starlette.requests import Request

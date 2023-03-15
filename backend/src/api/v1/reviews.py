@@ -1,8 +1,9 @@
 from http import HTTPStatus
 
 import orjson
-from core.config import logger
 from fastapi import APIRouter, HTTPException
+
+from core.config import logger
 from models.models import Movie, Review
 from services.reviews import Reviews
 from starlette.requests import Request

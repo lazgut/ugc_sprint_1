@@ -2,7 +2,7 @@ from typing import Optional
 
 import motor.motor_asyncio
 import pymongo
-from core.config import logger, settings
+from core.config import settings, logger
 
 mongo_client: Optional[motor.motor_asyncio.AsyncIOMotorClient] = None
 
