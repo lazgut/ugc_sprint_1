@@ -23,4 +23,5 @@ Link to the project: https://github.com/dondublon/ugc_sprint_1-1
 
 ## Отказоуйстойчивость
 Отказоуйстойчивость обеспечивается двумя очередями rabbitmq+event_consumer. 
-Пытаемся отправить в rabbitmq, если не получается - то в rabbitmq_dlq.
+Пытаемся отправить в rabbitmq, если не получается - то в rabbitmq_dlq. 
+Даже если notificator выйдет из строя, сообщения останутся и будут обработаны. 
