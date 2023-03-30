@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         # Uncommented for local debug
-        env_file = "C:\\Users\\artur\\PycharmProjects\\yandex_practicum\\ugc_sprint_1\\.env"
-        env_file_encoding = "utf-8"
+        # env_file = "/home/artur/PycharmProjects/yandex_practicum/ugc_sprint_1/.env"
+        # env_file_encoding = "utf-8"
 
 
 settings = Settings()

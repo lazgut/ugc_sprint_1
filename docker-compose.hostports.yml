@@ -1,0 +1,14 @@
+version: '3.5'
+
+services:
+    zookeeper:
+      ports:
+        - "2181:2181"
+    kafka:
+      ports:
+        - "9092:9092"
+
+    clickhouse-node1:
+      ports:
+        - "8123:8123"
+        - "9000:9000"

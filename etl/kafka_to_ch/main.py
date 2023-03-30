@@ -3,7 +3,7 @@ import logging
 
 from clickhouse_driver import connect
 from helpers.backoff import backoff
-from settings import Settings
+from settings import settings
 from tools.extractor import KafkaExtractor
 from tools.loader import ClickHouseLoader
 
@@ -11,10 +11,9 @@ from tools.loader import ClickHouseLoader
 @backoff()
 async def main():
     logging.info("Created settings.")
-    settings = Settings()
 
     kafka_point = KafkaExtractor(
-        topic=settings.TOPIC_CH,
+        settings.TOPIC_CH,
         auto_offset_reset=settings.OFFSET_RESET_CH,
         bootstrap_servers=settings.KAFKA_DSN,
         enable_auto_commit=settings.AUTO_COMMIT_CH,
