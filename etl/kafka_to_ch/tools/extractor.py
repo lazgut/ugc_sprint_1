@@ -3,15 +3,15 @@ from kafka import KafkaConsumer
 
 class KafkaExtractor:
     def __init__(
-        self,
-        topic: str,
-        auto_offset_reset: str,
-        bootstrap_servers: str,
-        enable_auto_commit: bool,
-        group_id: str,
-        chunk_size=10000,
-        consumer_timeout_ms=1000,
-        api_version=(0, 11, 5),
+            self,
+            topic: str,
+            auto_offset_reset: str,
+            bootstrap_servers: str,
+            enable_auto_commit: bool,
+            group_id: str,
+            chunk_size=10000,
+            consumer_timeout_ms=1000,
+            api_version=(0, 11, 5),
     ):
         self.consumer = None
         self.topic = topic
@@ -22,7 +22,7 @@ class KafkaExtractor:
         self.consumer_timeout_ms = consumer_timeout_ms
         self.chunk_size = chunk_size
         self.data_extract = []
-        self.api_version=api_version
+        self.api_version = api_version
 
     def __enter__(self):
         self.consumer = KafkaConsumer(
